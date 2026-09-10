@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ShieldCheck, Flame, Terminal, Cpu } from 'lucide-react';
+import { ShieldCheck, Flame, Terminal, Cpu, Copy, Check, Share2 } from 'lucide-react';
 import { ChatMessage } from '../types';
 import { MatrixRain } from './MatrixRain';
+import { copyToClipboard } from '../utils/clipboard';
 
 interface ChatAreaProps {
   messages: ChatMessage[];
@@ -10,6 +11,8 @@ interface ChatAreaProps {
   isStealthMode: boolean;
   onOpenSecurityModal: () => void;
   onExpireMessage: (id: string) => void;
+  roomId: string;
+  isHost?: boolean;
 }
 
 export const ChatArea: React.FC<ChatAreaProps> = ({
@@ -19,7 +22,11 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
   isStealthMode,
   onOpenSecurityModal,
   onExpireMessage,
+  roomId,
+  isHost = false,
 }) => {
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const [now, setNow] = useState(Date.now());
   const messagesRef = useRef(messages);
@@ -50,6 +57,23 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
     return new Date(ts).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
   };
 
+  const handleCopyCode = async () => {
+    const ok = await copyToClipboard(roomId);
+    if (ok) {
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    const url = window.location.href;
+    const ok = await copyToClipboard(url);
+    if (ok) {
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    }
+  };
+
   return (
     <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-[#0B0E14] relative font-mono">
       {/* Background Matrix Rain */}
@@ -74,17 +98,65 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
       </div>
 
       {messages.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 text-center space-y-3 relative z-10">
-          <div className="border border-[#1F2937] bg-[#05070A] p-3 text-[#00FF66]">
-            <Terminal className="w-6 h-6" />
-          </div>
-          <div className="space-y-1">
-            <div className="text-xs font-bold text-[#E0E6ED] uppercase tracking-wider">
-              &gt; TERMINAL_BUFFER_EMPTY
+        <div className="mx-auto max-w-md border-2 border-[#1F2937] bg-[#05070A]/95 p-5 shadow-2xl space-y-4 my-6 relative z-10">
+          <div className="flex items-center justify-between border-b border-[#1F2937] pb-3">
+            <div className="flex items-center space-x-2">
+              <Terminal className="w-4 h-4 text-[#00FF66]" />
+              <span className="text-xs font-bold text-white uppercase tracking-wider">
+                [ ROOM_ACCESS_CREDENTIALS ]
+              </span>
             </div>
-            <p className="text-[11px] text-[#8A99AD] max-w-xs">
-              Mulai transmisi payload atau bagikan link node ini kepada peer Anda.
+            <span className="text-[10px] text-[#00FF66] bg-[#00FF66]/10 px-2 py-0.5 border border-[#00FF66]/30 font-bold">
+              NODE_ONLINE
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            {/* Room Code Box */}
+            <div className="p-3 bg-[#0B0E14] border border-[#1F2937] space-y-1.5">
+              <div className="text-[10px] text-[#8A99AD] font-bold uppercase tracking-wider">
+                &gt; KODE ROOM (TOKEN):
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <code className="text-sm font-bold text-[#00F0FF] tracking-wider select-all break-all">
+                  {roomId}
+                </code>
+                <button
+                  type="button"
+                  onClick={handleCopyCode}
+                  className="h-8 px-3 text-xs font-bold border border-[#00F0FF] bg-[#00F0FF]/10 hover:bg-[#00F0FF] text-[#00F0FF] hover:text-[#0B0E14] transition shrink-0 flex items-center space-x-1 cursor-pointer"
+                >
+                  {copiedCode ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedCode ? '[ COPIED ]' : '[ COPY CODE ]'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Full Link Box */}
+            <div className="p-3 bg-[#0B0E14] border border-[#1F2937] space-y-1.5">
+              <div className="text-[10px] text-[#8A99AD] font-bold uppercase tracking-wider">
+                &gt; TAUTAN UNDANGAN LENGKAP (E2EE):
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                className="w-full h-10 px-3 text-xs font-bold border border-[#00FF66] bg-[#00FF66] hover:bg-[#00dd55] text-[#0B0E14] transition flex items-center justify-center space-x-2 cursor-pointer shadow-[0_0_12px_rgba(0,255,102,0.25)]"
+              >
+                {copiedLink ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+                <span>{copiedLink ? '[ TAUTAN DISALIN! ]' : '[ SALIN LINK LENGKAP ]'}</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="text-[11px] text-[#8A99AD] leading-relaxed border-t border-[#1F2937] pt-3 space-y-1">
+            <p>
+              💡 <strong className="text-white">Cara Mengundang Teman:</strong> Kirimkan tautan lengkap atau kode room di atas.
             </p>
+            {isHost && (
+              <p className="text-[#00FF66]">
+                🔒 Saat teman Anda mengetuk pintu (Knock), notifikasi persetujuan (ACC) akan muncul otomatis di layar ini.
+              </p>
+            )}
           </div>
         </div>
       )}

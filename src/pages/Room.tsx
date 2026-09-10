@@ -346,6 +346,8 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
         isStealthMode={isStealthMode}
         onOpenSecurityModal={() => setIsSecurityModalOpen(true)}
         onExpireMessage={handleExpireMessage}
+        roomId={actualRoomId}
+        isHost={isHost}
       />
 
       <ChatInput

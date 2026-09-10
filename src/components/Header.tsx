@@ -28,6 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleStealthMode,
 }) => {
   const [copied, setCopied] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
   const [soundMuted, setSoundMuted] = useState(!sound.enabled);
 
   const copyRoomLink = async () => {
@@ -36,6 +37,14 @@ export const Header: React.FC<HeaderProps> = ({
     if (ok) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const copyRoomCode = async () => {
+    const ok = await copyToClipboard(roomId);
+    if (ok) {
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
     }
   };
 
@@ -67,9 +76,20 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </div>
           <div className="flex items-center space-x-2 text-[11px] text-[#8A99AD] mt-0.5">
-            <span>
-              NODE: <span className="text-[#00F0FF] font-bold">{roomId}</span>
-            </span>
+            <button
+              type="button"
+              onClick={copyRoomCode}
+              className="hover:text-white transition flex items-center gap-1 cursor-pointer bg-[#0B0E14] px-1 py-0.5 border border-[#1F2937] hover:border-[#00F0FF]"
+              title="Klik untuk salin kode token room"
+            >
+              <span>NODE:</span>
+              <span className="text-[#00F0FF] font-bold">{roomId}</span>
+              {copiedCode ? (
+                <span className="text-[9px] text-[#00FF66] font-bold ml-1">[COPIED]</span>
+              ) : (
+                <Copy className="w-2.5 h-2.5 text-[#8A99AD] ml-0.5" />
+              )}
+            </button>
             {isHost && (
               <span className="px-1 text-[9px] bg-[#FF003C]/10 text-[#FF003C] border border-[#FF003C]/40 font-bold">
                 ROOT_HOST
