@@ -90,12 +90,13 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={copyRoomCode}
-              className="hover:text-white transition flex items-center gap-1 cursor-pointer bg-[#0B0E14] px-1 py-0.2 border border-[#1F2937] hover:border-[#00F0FF] max-w-[120px] sm:max-w-[200px]"
+              className="hover:text-white transition flex items-center gap-1.5 cursor-pointer bg-[#0B0E14] px-1.5 py-0.5 border border-[#1F2937] hover:border-[#00F0FF]"
               title="Klik untuk salin kode room ini"
             >
-              <span className="text-[#00F0FF] font-bold truncate">{roomId}</span>
+              <span className="text-[#8A99AD] text-[9px]">ROOM:</span>
+              <span className="text-[#00F0FF] font-bold tracking-widest">{roomId}</span>
               {copiedCode ? (
-                <span className="text-[8px] text-[#00FF66] font-bold shrink-0">[OK]</span>
+                <span className="text-[9px] text-[#00FF66] font-bold shrink-0">[OK]</span>
               ) : (
                 <Copy className="w-2.5 h-2.5 text-[#8A99AD] shrink-0" />
               )}

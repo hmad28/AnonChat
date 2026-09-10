@@ -54,8 +54,9 @@ export async function deriveRoomKey(roomSecret: string, roomId: string): Promise
     ['deriveKey']
   );
 
-  // Use roomId as deterministic salt
-  const salt = enc.encode(`anonchat-salt-${roomId}`);
+  // Use normalized roomId as deterministic salt (lowercase and trimmed)
+  const cleanSalt = roomId.trim().toLowerCase();
+  const salt = enc.encode(`anonchat-salt-${cleanSalt}`);
 
   return crypto.subtle.deriveKey(
     {

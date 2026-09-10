@@ -1,21 +1,20 @@
-export function generateRoomId(): string {
-  const adjectives = [
-    'swift', 'silent', 'shadow', 'cosmic', 'secret',
-    'neon', 'ghost', 'quiet', 'amber', 'cyber',
-    'phantom', 'hyper', 'crypto', 'dark', 'matrix', 'stealth'
-  ];
-  const nouns = [
-    'fox', 'raven', 'falcon', 'cipher', 'echo',
-    'nexus', 'pulse', 'spark', 'drift', 'vault',
-    'node', 'vector', 'daemon', 'proxy', 'terminal', 'relay'
-  ];
-  
-  const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-  const noun = nouns[Math.floor(Math.random() * nouns.length)];
-  const num = Math.floor(1000 + Math.random() * 9000);
-  const entropy = Math.random().toString(36).substring(2, 6);
+// Unambiguous alphanumeric charset (32 chars): excluding 0, O, 1, I to eliminate human reading confusion
+const ROOM_ID_CHARS = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
 
-  return `${adj}-${noun}-${num}-${entropy}`;
+export function generateRoomId(length: number = 6): string {
+  let result = '';
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const values = new Uint8Array(length);
+    crypto.getRandomValues(values);
+    for (let i = 0; i < length; i++) {
+      result += ROOM_ID_CHARS[values[i] % ROOM_ID_CHARS.length];
+    }
+  } else {
+    for (let i = 0; i < length; i++) {
+      result += ROOM_ID_CHARS[Math.floor(Math.random() * ROOM_ID_CHARS.length)];
+    }
+  }
+  return result;
 }
 
 // Convert room ID to an isolated namespace on the public PeerJS signaling broker

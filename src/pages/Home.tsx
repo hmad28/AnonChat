@@ -11,6 +11,7 @@ interface HomeProps {
 
 export const Home: React.FC<HomeProps> = ({ onStartRoom, initialRoomId }) => {
   const [hostNick, setHostNick] = useState('');
+  const [customRoomId, setCustomRoomId] = useState('');
   const [guestNick, setGuestNick] = useState('');
   const [joinInput, setJoinInput] = useState(initialRoomId || '');
   const [activeTab, setActiveTab] = useState<'create' | 'join'>(initialRoomId ? 'join' : 'create');
@@ -18,8 +19,8 @@ export const Home: React.FC<HomeProps> = ({ onStartRoom, initialRoomId }) => {
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     const finalNick = hostNick.trim() || `ANON_${Math.floor(100 + Math.random() * 900)}`;
-    const newRoomId = generateRoomId();
-    onStartRoom(newRoomId, finalNick, true);
+    const finalRoomId = customRoomId.trim().toUpperCase().replace(/[^A-Z0-9-]/g, '') || generateRoomId(6);
+    onStartRoom(finalRoomId, finalNick, true);
   };
 
   const handleJoin = (e: React.FormEvent) => {
@@ -39,7 +40,8 @@ export const Home: React.FC<HomeProps> = ({ onStartRoom, initialRoomId }) => {
     } catch {}
 
     const finalNick = guestNick.trim() || `GUEST_${Math.floor(100 + Math.random() * 900)}`;
-    onStartRoom(parsedRoomId, finalNick, false);
+    const finalRoomId = parsedRoomId.includes('/') ? parsedRoomId : parsedRoomId.toUpperCase();
+    onStartRoom(finalRoomId, finalNick, false);
   };
 
   return (
@@ -124,6 +126,21 @@ export const Home: React.FC<HomeProps> = ({ onStartRoom, initialRoomId }) => {
                   maxLength={25}
                   className="w-full h-11 bg-[#0B0E14] border border-[#1F2937] focus:border-[#00FF66] text-[#00FF66] placeholder-[#374151] text-xs px-3.5 transition outline-none font-mono font-semibold"
                 />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between text-xs font-mono text-[#8A99AD] mb-1.5">
+                  <span className="text-[#00FF66]">&gt; KODE_ROOM (OPSIONAL):</span>
+                  <span className="text-[10px] text-[#8A99AD]">[AUTO 6 KARAKTER]</span>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Kosongkan untuk otomatis (misal: 7K9MP2)"
+                  value={customRoomId}
+                  onChange={(e) => setCustomRoomId(e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, ''))}
+                  maxLength={16}
+                  className="w-full h-11 bg-[#0B0E14] border border-[#1F2937] focus:border-[#00FF66] text-[#00FF66] placeholder-[#374151] text-xs px-3.5 transition outline-none font-mono tracking-wider font-semibold uppercase"
+                />
                 <div className="text-[10px] text-[#8A99AD] mt-1.5 flex items-center gap-1">
                   <CornerDownRight className="w-3 h-3 text-[#00FF66]" />
                   <span>Anda bertindak sebagai Gatekeeper: hanya tamu yang Anda ACC yang bisa masuk.</span>
@@ -143,14 +160,15 @@ export const Home: React.FC<HomeProps> = ({ onStartRoom, initialRoomId }) => {
               <div>
                 <div className="flex items-center justify-between text-xs font-mono text-[#8A99AD] mb-1.5">
                   <span className="text-[#00F0FF]">&gt; TARGET_ROOM_TOKEN_OR_URL:</span>
+                  <span className="text-[10px] text-[#8A99AD]">[6-8 CHARS / URL]</span>
                 </div>
                 <input
                   type="text"
                   required
-                  placeholder="Tempel tautan atau ketik kode room target..."
+                  placeholder="Ketik 6 digit kode room (misal: 7K9MP2) atau tempel link..."
                   value={joinInput}
                   onChange={(e) => setJoinInput(e.target.value)}
-                  className="w-full h-11 bg-[#0B0E14] border border-[#1F2937] focus:border-[#00F0FF] text-[#00F0FF] placeholder-[#374151] text-xs px-3.5 transition outline-none font-mono"
+                  className="w-full h-11 bg-[#0B0E14] border border-[#1F2937] focus:border-[#00F0FF] text-[#00F0FF] placeholder-[#374151] text-xs px-3.5 transition outline-none font-mono tracking-wide"
                 />
               </div>
 

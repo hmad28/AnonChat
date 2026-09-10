@@ -2,7 +2,7 @@ import Peer, { DataConnection } from 'peerjs';
 import { ChatMessage, KnockRequest, P2PPayload, Participant, Role } from '../types';
 import { sound } from '../utils/audio';
 import { deriveRoomKey, encryptText, decryptText, EncryptedData } from '../utils/crypto';
-import { toPeerSignalingId } from '../utils/id';
+import { toPeerSignalingId, generateRoomId } from '../utils/id';
 
 const ICE_SERVERS = [
   { urls: 'stun:stun.l.google.com:19302' },
@@ -128,9 +128,8 @@ export class PeerService {
         console.error('Peer host error:', err);
         if (err.type === 'unavailable-id') {
           if (retryCount < 3) {
-            console.warn(`Signaling ID "${signalingId}" is already taken on broker, auto-recovering with fresh suffix...`);
-            const suffix = Math.random().toString(36).substring(2, 6);
-            const newRoomId = `${roomId}-${suffix}`;
+            console.warn(`Signaling ID "${signalingId}" is already taken on broker, auto-recovering with fresh room ID...`);
+            const newRoomId = generateRoomId(6);
             this.callbacks.onRoomIdUpdated?.(newRoomId);
             try {
               this.peer?.destroy();
