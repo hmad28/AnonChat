@@ -16,11 +16,27 @@ interface RoomProps {
   roomId: string;
   nickname: string;
   isHost: boolean;
+  initialRoomSecret?: string;
   onBackToHome: () => void;
 }
 
-export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHome }) => {
+export const Room: React.FC<RoomProps> = ({
+  roomId,
+  nickname,
+  isHost,
+  initialRoomSecret,
+  onBackToHome,
+}) => {
   const [actualRoomId, setActualRoomId] = useState(roomId);
+  const [roomSecret, setRoomSecret] = useState<string>(() => {
+    if (initialRoomSecret) return initialRoomSecret;
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const hashKey = hashParams.get('key');
+    if (hashKey) return hashKey;
+    if (isHost) return generateRoomSecret();
+    return '';
+  });
+
   const [status, setStatus] = useState<
     'connecting' | 'waiting_approval' | 'active' | 'rejected' | 'dissolved' | 'error'
   >('connecting');
@@ -54,14 +70,9 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
   }, []);
 
   useEffect(() => {
-    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-    let roomSecret = hashParams.get('key') || '';
-
-    if (isHost && !roomSecret) {
-      roomSecret = generateRoomSecret();
-      const url = new URL(window.location.href);
-      url.hash = `key=${roomSecret}`;
-      window.history.replaceState({}, '', url.toString());
+    const activeSecret = roomSecret || (isHost ? generateRoomSecret() : '');
+    if (!roomSecret && activeSecret) {
+      setRoomSecret(activeSecret);
     }
 
     const service = new PeerService({
@@ -104,26 +115,21 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
         }
       },
       onApproved: (secret: string) => {
-        const url = new URL(window.location.href);
-        url.hash = `key=${secret}`;
-        window.history.replaceState({}, '', url.toString());
+        setRoomSecret(secret);
       },
       onRoomIdUpdated: (newId: string) => {
         setActualRoomId(newId);
-        const url = new URL(window.location.href);
-        url.searchParams.set('room', newId);
-        window.history.replaceState({}, '', url.toString());
       },
     });
 
     peerServiceRef.current = service;
 
     if (isHost) {
-      service.initHost(roomId, nickname, myColorRef.current, roomSecret).catch((err) => {
+      service.initHost(roomId, nickname, myColorRef.current, activeSecret).catch((err) => {
         console.error('Failed to init host', err);
       });
     } else {
-      service.initGuest(roomId, nickname, myColorRef.current, roomSecret).catch((err) => {
+      service.initGuest(roomId, nickname, myColorRef.current, activeSecret).catch((err) => {
         console.error('Failed to init guest', err);
       });
     }
@@ -208,7 +214,17 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
             </div>
             <h2 className="text-base font-bold text-white">&gt; MENUNGGU_OTORISASI_ROOT_HOST</h2>
             <p className="text-xs text-[#8A99AD] leading-relaxed">
-              Permintaan masuk telah dikirimkan ke Root Host room <span className="text-[#00F0FF] font-bold">{roomId}</span>. Ruang chat akan terbuka otomatis segera setelah disetujui.
+              Permintaan masuk telah dikirimkan ke Root Host room <span className="text-[#00F0FF] font-bold tracking-wider">{actualRoomId}</span>. Ruang chat akan terbuka otomatis segera setelah disetujui.
+            </p>
+          </div>
+
+          <div className="bg-[#0B0E14] border border-[#1F2937] p-3 text-left space-y-1">
+            <div className="flex items-center justify-between text-[10px] text-[#8A99AD]">
+              <span>CALLSIGN ANDA:</span>
+              <span className="text-[#00FF66] font-bold">{nickname}</span>
+            </div>
+            <p className="text-[10px] text-[#8A99AD] leading-normal">
+              Host sedang meninjau permintaan masuk Anda. Layar chat akan terbuka otomatis tanpa perlu me-refresh halaman.
             </p>
           </div>
 
@@ -321,6 +337,7 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
     <div className="min-h-screen flex flex-col bg-[#0B0E14] text-[#E0E6ED] font-mono relative crt-overlay">
       <Header
         roomId={actualRoomId}
+        roomSecret={roomSecret}
         isHost={isHost}
         participantCount={participants.length}
         onLeaveOrDissolve={handleLeaveOrDissolve}
@@ -347,6 +364,7 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
         onOpenSecurityModal={() => setIsSecurityModalOpen(true)}
         onExpireMessage={handleExpireMessage}
         roomId={actualRoomId}
+        roomSecret={roomSecret}
         isHost={isHost}
       />
 

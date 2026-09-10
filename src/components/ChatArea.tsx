@@ -3,6 +3,7 @@ import { ShieldCheck, Flame, Terminal, Cpu, Copy, Check, Share2 } from 'lucide-r
 import { ChatMessage } from '../types';
 import { MatrixRain } from './MatrixRain';
 import { copyToClipboard } from '../utils/clipboard';
+import { generateStealthInviteUrl } from '../utils/stealth';
 
 interface ChatAreaProps {
   messages: ChatMessage[];
@@ -12,6 +13,7 @@ interface ChatAreaProps {
   onOpenSecurityModal: () => void;
   onExpireMessage: (id: string) => void;
   roomId: string;
+  roomSecret?: string;
   isHost?: boolean;
 }
 
@@ -23,6 +25,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
   onOpenSecurityModal,
   onExpireMessage,
   roomId,
+  roomSecret,
   isHost = false,
 }) => {
   const [copiedCode, setCopiedCode] = useState(false);
@@ -66,7 +69,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
   };
 
   const handleCopyLink = async () => {
-    const url = window.location.href;
+    const url = generateStealthInviteUrl(roomId, roomSecret);
     const ok = await copyToClipboard(url);
     if (ok) {
       setCopiedLink(true);
@@ -118,7 +121,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
                 &gt; KODE ROOM (TOKEN):
               </div>
               <div className="flex items-center justify-between gap-2">
-                <code className="text-sm font-bold text-[#00F0FF] tracking-wider select-all break-all">
+                <code className="text-sm font-bold text-[#00F0FF] tracking-widest select-all break-all">
                   {roomId}
                 </code>
                 <button
@@ -132,10 +135,11 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
               </div>
             </div>
 
-            {/* Full Link Box */}
+            {/* Full Stealth Link Box */}
             <div className="p-3 bg-[#0B0E14] border border-[#1F2937] space-y-1.5">
-              <div className="text-[10px] text-[#8A99AD] font-bold uppercase tracking-wider">
-                &gt; TAUTAN UNDANGAN LENGKAP (E2EE):
+              <div className="flex items-center justify-between text-[10px] text-[#8A99AD] font-bold uppercase tracking-wider">
+                <span>&gt; TAUTAN UNDANGAN STEALTH (ZERO-LOGS):</span>
+                <span className="text-[#00FF66] text-[9px]">[TERSELEBUNG]</span>
               </div>
               <button
                 type="button"
@@ -143,7 +147,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
                 className="w-full h-10 px-3 text-xs font-bold border border-[#00FF66] bg-[#00FF66] hover:bg-[#00dd55] text-[#0B0E14] transition flex items-center justify-center space-x-2 cursor-pointer shadow-[0_0_12px_rgba(0,255,102,0.25)]"
               >
                 {copiedLink ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
-                <span>{copiedLink ? '[ TAUTAN DISALIN! ]' : '[ SALIN LINK LENGKAP ]'}</span>
+                <span>{copiedLink ? '[ TAUTAN STEALTH DISALIN! ]' : '[ SALIN TAUTAN STEALTH ]'}</span>
               </button>
             </div>
           </div>

@@ -3,9 +3,11 @@ import { Copy, Check, Volume2, VolumeX, Users, Eye, EyeOff, LogOut, Share2 } fro
 import { sound } from '../utils/audio';
 import { GuyFawkesIcon } from './GuyFawkesIcon';
 import { copyToClipboard } from '../utils/clipboard';
+import { generateStealthInviteUrl } from '../utils/stealth';
 
 interface HeaderProps {
   roomId: string;
+  roomSecret?: string;
   isHost: boolean;
   participantCount: number;
   onLeaveOrDissolve: () => void;
@@ -18,6 +20,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   roomId,
+  roomSecret,
   isHost,
   participantCount,
   onLeaveOrDissolve,
@@ -32,8 +35,8 @@ export const Header: React.FC<HeaderProps> = ({
   const [soundMuted, setSoundMuted] = useState(!sound.enabled);
 
   const copyRoomLink = async () => {
-    const url = window.location.href;
-    const ok = await copyToClipboard(url);
+    const inviteUrl = generateStealthInviteUrl(roomId, roomSecret);
+    const ok = await copyToClipboard(inviteUrl);
     if (ok) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);

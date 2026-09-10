@@ -3,9 +3,10 @@ import { Terminal, Shield, Key, ArrowRight, CornerDownRight, Binary, Cpu } from 
 import { generateRoomId } from '../utils/id';
 import { GuyFawkesIcon } from '../components/GuyFawkesIcon';
 import { MatrixRain } from '../components/MatrixRain';
+import { decodeStealthTicket } from '../utils/stealth';
 
 interface HomeProps {
-  onStartRoom: (roomId: string, nickname: string, isHost: boolean) => void;
+  onStartRoom: (roomId: string, nickname: string, isHost: boolean, roomSecret?: string) => void;
   initialRoomId?: string;
 }
 
@@ -27,21 +28,46 @@ export const Home: React.FC<HomeProps> = ({ onStartRoom, initialRoomId }) => {
     e.preventDefault();
     if (!joinInput.trim()) return;
 
-    let parsedRoomId = joinInput.trim();
+    let raw = joinInput.trim();
+    let parsedRoomId = raw;
+    let parsedKey: string | undefined = undefined;
+
+    // Check if input is a URL containing stealth hash (#node=... or #s=...)
+    if (raw.includes('#')) {
+      const hashPart = raw.split('#')[1] || '';
+      const params = new URLSearchParams(hashPart);
+      const token = params.get('node') || params.get('s') || params.get('join') || hashPart;
+      const decoded = decodeStealthTicket(token);
+      if (decoded) {
+        parsedRoomId = decoded.roomId;
+        parsedKey = decoded.key;
+      }
+    } else {
+      // Check if user directly pasted a stealth token
+      const decoded = decodeStealthTicket(raw);
+      if (decoded) {
+        parsedRoomId = decoded.roomId;
+        parsedKey = decoded.key;
+      }
+    }
+
+    // Check legacy URL format (?room=...)
     try {
-      if (parsedRoomId.includes('http://') || parsedRoomId.includes('https://') || parsedRoomId.includes('?room=')) {
+      if (parsedRoomId.includes('?room=') || parsedRoomId.startsWith('http')) {
         const url = new URL(parsedRoomId.startsWith('http') ? parsedRoomId : `http://dummy.com/${parsedRoomId}`);
         const qRoom = url.searchParams.get('room');
         if (qRoom) parsedRoomId = qRoom;
         if (url.hash) {
-          window.location.hash = url.hash;
+          const hashParams = new URLSearchParams(url.hash.replace(/^#/, ''));
+          const k = hashParams.get('key');
+          if (k) parsedKey = k;
         }
       }
     } catch {}
 
     const finalNick = guestNick.trim() || `GUEST_${Math.floor(100 + Math.random() * 900)}`;
-    const finalRoomId = parsedRoomId.includes('/') ? parsedRoomId : parsedRoomId.toUpperCase();
-    onStartRoom(finalRoomId, finalNick, false);
+    const finalRoomId = parsedRoomId.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+    onStartRoom(finalRoomId, finalNick, false, parsedKey);
   };
 
   return (

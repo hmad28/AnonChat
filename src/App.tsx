@@ -1,41 +1,54 @@
 import { useState, useEffect } from 'react';
 import { Home } from './pages/Home';
 import { Room } from './pages/Room';
+import { parseIncomingInvite } from './utils/stealth';
 
 export function App() {
   const [currentRoom, setCurrentRoom] = useState<{
     roomId: string;
     nickname: string;
     isHost: boolean;
+    roomSecret?: string;
   } | null>(null);
 
-  const [initialJoinRoomId, setInitialJoinRoomId] = useState<string>('');
-
   useEffect(() => {
-    // Check URL query parameters for invited room: ?room=xxxx
-    const params = new URLSearchParams(window.location.search);
-    const roomFromUrl = params.get('room');
-    if (roomFromUrl) {
-      setInitialJoinRoomId(roomFromUrl);
+    // Check for incoming invite (stealth hash #node=... or legacy ?room=...)
+    const invite = parseIncomingInvite();
+    if (invite && invite.roomId) {
+      // Immediately clean visible URL bar so room ID and tokens don't leak in browser history
+      try {
+        window.history.replaceState({}, '', window.location.pathname);
+      } catch {}
+
+      // Auto-assign random callsign or remembered callsign
+      const savedNick = sessionStorage.getItem('anon_callsign');
+      const autoNick = savedNick || `GUEST_${Math.floor(100 + Math.random() * 900)}`;
+
+      // IMMEDIATELY ENTER THE ROOM! No landing page, no "bikin room chat dan gabung"
+      setCurrentRoom({
+        roomId: invite.roomId,
+        nickname: autoNick,
+        isHost: false,
+        roomSecret: invite.key,
+      });
     }
   }, []);
 
-  const handleStartRoom = (roomId: string, nickname: string, isHost: boolean) => {
-    setCurrentRoom({ roomId, nickname, isHost });
-    // Update URL query without full page reload
-    const url = new URL(window.location.href);
-    url.searchParams.set('room', roomId);
-    window.history.pushState({}, '', url.toString());
+  const handleStartRoom = (roomId: string, nickname: string, isHost: boolean, roomSecret?: string) => {
+    // Save callsign preference
+    sessionStorage.setItem('anon_callsign', nickname);
+    // Keep URL clean without appending query parameters
+    try {
+      window.history.replaceState({}, '', window.location.pathname);
+    } catch {}
+    setCurrentRoom({ roomId, nickname, isHost, roomSecret });
   };
 
   const handleBackToHome = () => {
     setCurrentRoom(null);
-    setInitialJoinRoomId('');
-    // Clear room query parameter and key hash
-    const url = new URL(window.location.href);
-    url.searchParams.delete('room');
-    url.hash = '';
-    window.history.pushState({}, '', url.pathname);
+    try {
+      window.history.replaceState({}, '', window.location.pathname);
+    } catch {}
   };
 
   return (
@@ -45,13 +58,11 @@ export function App() {
           roomId={currentRoom.roomId}
           nickname={currentRoom.nickname}
           isHost={currentRoom.isHost}
+          initialRoomSecret={currentRoom.roomSecret}
           onBackToHome={handleBackToHome}
         />
       ) : (
-        <Home
-          onStartRoom={handleStartRoom}
-          initialRoomId={initialJoinRoomId}
-        />
+        <Home onStartRoom={handleStartRoom} />
       )}
     </div>
   );

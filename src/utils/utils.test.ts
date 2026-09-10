@@ -36,4 +36,22 @@ describe('Utility Functions', () => {
     expect(color).toBeTruthy();
     expect(color).toContain('text-');
   });
+
+  it('should encode and decode stealth invite tickets securely', async () => {
+    const { encodeStealthTicket, decodeStealthTicket } = await import('./stealth');
+    const roomId = '7K9MP2';
+    const key = 'a1b2c3d4e5f60718293a4b5c6d7e8f90';
+
+    const ticket = encodeStealthTicket(roomId, key);
+    expect(ticket).toBeTruthy();
+    // Must NOT contain obvious words or raw room code
+    expect(ticket).not.toContain('7K9MP2');
+    expect(ticket).not.toContain('room=');
+    expect(ticket).not.toContain('key=');
+
+    const decoded = decodeStealthTicket(ticket);
+    expect(decoded).not.toBeNull();
+    expect(decoded?.roomId).toBe('7K9MP2');
+    expect(decoded?.key).toBe(key);
+  });
 });
