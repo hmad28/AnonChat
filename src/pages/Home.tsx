@@ -43,69 +43,69 @@ export const Home: React.FC<HomeProps> = ({ onStartRoom, initialRoomId }) => {
   };
 
   return (
-    <main className="min-h-screen relative flex flex-col justify-center items-center px-4 py-10 bg-[#0B0E14] text-[#E0E6ED] crt-overlay overflow-hidden">
+    <main className="min-h-screen relative flex flex-col justify-center items-center px-3 sm:px-4 py-6 sm:py-10 bg-[#0B0E14] text-[#E0E6ED] crt-overlay overflow-y-auto">
       {/* Background Matrix Rain */}
       <MatrixRain opacity={0.12} />
 
-      <div className="w-full max-w-lg space-y-6 relative z-10">
+      <div className="w-full max-w-lg space-y-4 sm:space-y-6 relative z-10 my-auto">
         {/* Terminal Header */}
-        <div className="border border-[#1F2937] bg-[#05070A]/90 p-5 shadow-2xl relative">
+        <div className="border border-[#1F2937] bg-[#05070A]/90 p-4 sm:p-5 shadow-2xl relative">
           {/* Corner crosshairs */}
           <div className="absolute top-0 left-0 text-[#00FF66] text-[10px] leading-none -translate-x-1 -translate-y-1 select-none">+</div>
           <div className="absolute top-0 right-0 text-[#00FF66] text-[10px] leading-none translate-x-1 -translate-y-1 select-none">+</div>
           <div className="absolute bottom-0 left-0 text-[#00FF66] text-[10px] leading-none -translate-x-1 translate-y-1 select-none">+</div>
           <div className="absolute bottom-0 right-0 text-[#00FF66] text-[10px] leading-none translate-x-1 translate-y-1 select-none">+</div>
 
-          <div className="flex items-center justify-between border-b border-[#1F2937] pb-3 mb-4">
-            <div className="flex items-center space-x-2.5">
-              <GuyFawkesIcon size={32} color="#00FF66" />
-              <div>
-                <div className="text-xs font-bold tracking-widest text-[#00FF66] uppercase terminal-glow">
+          <div className="flex items-center justify-between border-b border-[#1F2937] pb-3 mb-3 sm:mb-4">
+            <div className="flex items-center space-x-2 sm:space-x-2.5 min-w-0">
+              <GuyFawkesIcon size={28} color="#00FF66" />
+              <div className="min-w-0">
+                <div className="text-xs sm:text-sm font-bold tracking-wider text-[#00FF66] uppercase terminal-glow truncate">
                   ANONCHAT // NET_TERMINAL
                 </div>
-                <div className="text-[10px] text-[#8A99AD] font-mono">
-                  SECURITY_LEVEL: AIRGAP_VOLATILE // E2EE
+                <div className="text-[9px] sm:text-[10px] text-[#8A99AD] font-mono">
+                  SECURITY: AIRGAP_VOLATILE // E2EE
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-1 text-[10px] font-mono text-[#00F0FF] bg-[#00F0FF]/10 px-2 py-0.5 border border-[#00F0FF]/30">
+            <div className="flex items-center space-x-1 text-[9px] sm:text-[10px] font-mono text-[#00F0FF] bg-[#00F0FF]/10 px-1.5 sm:px-2 py-0.5 border border-[#00F0FF]/30 shrink-0">
               <span className="w-1.5 h-1.5 bg-[#00FF66] animate-pulse" />
-              <span>NODE_READY</span>
+              <span>READY</span>
             </div>
           </div>
 
-          <p className="text-xs text-[#8A99AD] leading-relaxed">
+          <p className="text-[11px] sm:text-xs text-[#8A99AD] leading-relaxed">
             Sistem komunikasi terdesentralisasi murni Peer-to-Peer. Bebas jejak riwayat, zero database, dan seluruh koneksi tamu tunduk pada otorisasi langsung dari Root Host.
           </p>
         </div>
 
         {/* Action Panel */}
-        <div className="border-2 border-[#1F2937] bg-[#05070A]/95 p-6 shadow-2xl relative">
+        <div className="border-2 border-[#1F2937] bg-[#05070A]/95 p-4 sm:p-6 shadow-2xl relative">
           {/* Mode Switcher */}
-          <div className="grid grid-cols-2 gap-2 mb-6 border-b border-[#1F2937] pb-4">
+          <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mb-4 sm:mb-6 border-b border-[#1F2937] pb-3 sm:pb-4">
             <button
               type="button"
               onClick={() => setActiveTab('create')}
-              className={`h-10 text-xs font-bold tracking-wider transition uppercase flex items-center justify-center space-x-1.5 ${
+              className={`h-10 text-[11px] sm:text-xs font-bold tracking-wider transition uppercase flex items-center justify-center space-x-1 sm:space-x-1.5 cursor-pointer ${
                 activeTab === 'create'
                   ? 'bg-[#00FF66] text-[#0B0E14] shadow-[0_0_12px_rgba(0,255,102,0.3)]'
                   : 'bg-[#111827] text-[#8A99AD] hover:text-[#E0E6ED] border border-[#1F2937]'
               }`}
             >
-              <Terminal className="w-3.5 h-3.5" />
-              <span>[ 01: INITIALIZE_ROOM ]</span>
+              <Terminal className="w-3.5 h-3.5 shrink-0" />
+              <span>[ 01: INITIALIZE ]</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('join')}
-              className={`h-10 text-xs font-bold tracking-wider transition uppercase flex items-center justify-center space-x-1.5 ${
+              className={`h-10 text-[11px] sm:text-xs font-bold tracking-wider transition uppercase flex items-center justify-center space-x-1 sm:space-x-1.5 cursor-pointer ${
                 activeTab === 'join'
                   ? 'bg-[#00F0FF] text-[#0B0E14] shadow-[0_0_12px_rgba(0,240,255,0.3)]'
                   : 'bg-[#111827] text-[#8A99AD] hover:text-[#E0E6ED] border border-[#1F2937]'
               }`}
             >
-              <Key className="w-3.5 h-3.5" />
-              <span>[ 02: INJECT_TOKEN ]</span>
+              <Key className="w-3.5 h-3.5 shrink-0" />
+              <span>[ 02: INJECT ]</span>
             </button>
           </div>
 
@@ -181,30 +181,30 @@ export const Home: React.FC<HomeProps> = ({ onStartRoom, initialRoomId }) => {
         </div>
 
         {/* Technical Architecture Specs Box */}
-        <div className="grid grid-cols-3 gap-2 text-[10px] font-mono">
-          <div className="p-2.5 border border-[#1F2937] bg-[#05070A]/80 space-y-0.5">
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-[9px] sm:text-[10px] font-mono">
+          <div className="p-2 sm:p-2.5 border border-[#1F2937] bg-[#05070A]/80 space-y-0.5">
             <div className="text-[#00FF66] font-bold flex items-center gap-1">
-              <Shield className="w-3 h-3" />
+              <Shield className="w-3 h-3 shrink-0" />
               <span>CIPHER</span>
             </div>
-            <div className="text-[#E0E6ED]">AES-GCM-256</div>
-            <div className="text-[#8A99AD]">WebCrypto Native</div>
+            <div className="text-[#E0E6ED] truncate">AES-GCM-256</div>
+            <div className="text-[#8A99AD] truncate">WebCrypto</div>
           </div>
-          <div className="p-2.5 border border-[#1F2937] bg-[#05070A]/80 space-y-0.5">
+          <div className="p-2 sm:p-2.5 border border-[#1F2937] bg-[#05070A]/80 space-y-0.5">
             <div className="text-[#00F0FF] font-bold flex items-center gap-1">
-              <Binary className="w-3 h-3" />
+              <Binary className="w-3 h-3 shrink-0" />
               <span>STORAGE</span>
             </div>
-            <div className="text-[#E0E6ED]">0x00_NONE</div>
-            <div className="text-[#8A99AD]">RAM Only / Volatile</div>
+            <div className="text-[#E0E6ED] truncate">0x00_NONE</div>
+            <div className="text-[#8A99AD] truncate">Volatile RAM</div>
           </div>
-          <div className="p-2.5 border border-[#1F2937] bg-[#05070A]/80 space-y-0.5">
+          <div className="p-2 sm:p-2.5 border border-[#1F2937] bg-[#05070A]/80 space-y-0.5">
             <div className="text-[#FF003C] font-bold flex items-center gap-1">
-              <Cpu className="w-3 h-3" />
+              <Cpu className="w-3 h-3 shrink-0" />
               <span>NETWORK</span>
             </div>
-            <div className="text-[#E0E6ED]">P2P_MESH</div>
-            <div className="text-[#8A99AD]">Zero Server Intermediary</div>
+            <div className="text-[#E0E6ED] truncate">P2P_MESH</div>
+            <div className="text-[#8A99AD] truncate">Zero Server</div>
           </div>
         </div>
       </div>

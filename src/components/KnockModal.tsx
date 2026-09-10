@@ -12,7 +12,7 @@ export const KnockModal: React.FC<KnockModalProps> = ({ knocks, onApprove, onRej
   if (knocks.length === 0) return null;
 
   return (
-    <div className="fixed top-20 right-4 left-4 sm:left-auto sm:w-96 z-40 space-y-3 pointer-events-none font-mono">
+    <div className="fixed top-16 sm:top-20 right-3 left-3 sm:left-auto sm:right-4 sm:w-96 z-50 space-y-3 pointer-events-none font-mono">
       {knocks.map((req) => (
         <div
           key={req.id}

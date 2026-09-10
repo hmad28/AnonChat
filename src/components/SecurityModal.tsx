@@ -30,8 +30,8 @@ export const SecurityModal: React.FC<SecurityModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0B0E14]/85 backdrop-blur-sm font-mono">
-      <div className="w-full max-w-md bg-[#05070A] border-2 border-[#00FF66] p-6 shadow-[0_0_25px_rgba(0,255,102,0.2)] space-y-5 relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#0B0E14]/85 backdrop-blur-sm font-mono overflow-y-auto">
+      <div className="w-full max-w-md bg-[#05070A] border-2 border-[#00FF66] p-4 sm:p-6 shadow-[0_0_25px_rgba(0,255,102,0.2)] space-y-4 sm:space-y-5 relative my-auto max-h-[92vh] overflow-y-auto">
         {/* Corner markers */}
         <div className="absolute top-0 left-0 text-[#00FF66] text-xs leading-none -translate-x-1 -translate-y-1 select-none">[+]</div>
         <div className="absolute top-0 right-0 text-[#00FF66] text-xs leading-none translate-x-1 -translate-y-1 select-none">[+]</div>

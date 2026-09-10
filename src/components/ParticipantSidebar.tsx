@@ -19,8 +19,15 @@ export const ParticipantSidebar: React.FC<ParticipantSidebarProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 z-40 w-80 bg-[#05070A] border-l-2 border-[#1F2937] shadow-2xl flex flex-col font-mono">
-      <div className="h-16 px-4 border-b border-[#1F2937] flex items-center justify-between">
+    <>
+      {/* Mobile backdrop */}
+      <div
+        className="fixed inset-0 bg-black/70 z-40 sm:hidden backdrop-blur-xs"
+        onClick={onClose}
+      />
+
+      <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-80 max-w-[85vw] bg-[#05070A] border-l-2 border-[#1F2937] shadow-2xl flex flex-col font-mono">
+        <div className="h-14 sm:h-16 px-4 border-b border-[#1F2937] flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Users className="w-4 h-4 text-[#00F0FF]" />
           <h2 className="font-bold text-xs text-white uppercase tracking-wider">
@@ -95,5 +102,6 @@ export const ParticipantSidebar: React.FC<ParticipantSidebarProps> = ({
         <span>MEMORI VOLATIL: SELURUH DATA HAPUS TOTAL SAAT BUBAR.</span>
       </div>
     </div>
+    </>
   );
 };
