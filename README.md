@@ -75,7 +75,12 @@ sequenceDiagram
    npm run dev
    ```
 
-4. Buka di browser:
+4. Jalankan pengujian otomatis (Unit Tests):
+   ```bash
+   npm test
+   ```
+
+5. Buka di browser:
    ```
    http://localhost:5173
    ```
@@ -85,11 +90,12 @@ sequenceDiagram
 ## Uji Coba Skenario Izin Masuk (ACC)
 
 1. Buka `http://localhost:5173` di jendela browser utama sebagai **Host**.
-2. Klik **"Buka Room Baru"** lalu salin link undangan dari tombol **"Salin Link"** di bagian atas.
-3. Buka jendela **Incognito / Browser Lain**, lalu tempel link undangan tersebut.
-4. Masukkan nama panggilan tamu lalu klik **"Ketuk Pintu (Minta Izin)"**.
-5. Di jendela Host akan muncul notifikasi persetujuan: klik **"Izinkan Masuk"**.
-6. Kedua jendela kini terhubung langsung dan percakapan realtime terenkripsi siap digunakan.
+2. Masukkan Root Codename Anda (atau biarkan acak), lalu klik **`[ EXECUTE: GENERATE_SECURE_ROOM ]`**.
+3. Salin link undangan melalui tombol **`[ SHARE_LINK ]`** di bilah atas.
+4. Buka jendela **Incognito / Browser Lain**, lalu tempel link undangan tersebut.
+5. Masukkan Callsign tamu lalu klik **`[ INITIATE_KNOCK: REQUEST_ENTRY ]`**.
+6. Di layar Host akan muncul notifikasi persetujuan: klik **`[ GRANT_ACCESS ]`** (atau `[ DENY ]` untuk menolak).
+7. Kedua peramban langsung terhubung secara P2P dengan enkripsi AES-GCM 256-bit dan kunci langsung tersinkronisasi.
 
 ---
 
@@ -113,31 +119,36 @@ Karena aplikasi ini 100% berjalan di sisi peramban (*Client-Side Static SPA*) ta
 AnonChat/
 ├── src/
 │   ├── components/
-│   │   ├── ChatArea.tsx           # Tampilan percakapan, status bar, dan timer pesan
-│   │   ├── ChatInput.tsx          # Input chat, pemilih durasi vanish, emoji drawer
-│   │   ├── Header.tsx             # Navigasi atas, salin link, mode samaran, kontrol room
-│   │   ├── KnockModal.tsx         # Panel persetujuan izin masuk tamu untuk host
-│   │   ├── ParticipantSidebar.tsx # Daftar anggota yang sedang aktif di room
-│   │   └── SecurityModal.tsx      # Dialog verifikasi Safety Number & Fingerprint
+│   │   ├── ChatArea.tsx           # Tampilan percakapan terminal, status E2EE, dan burn timer
+│   │   ├── ChatInput.tsx          # Prompt input `anon@node:~# `, vanish selector, emoji drawer
+│   │   ├── GuyFawkesIcon.tsx      # Ikon vektor minimalis Anonymous / Guy Fawkes mask
+│   │   ├── Header.tsx             # Header bar terminal, status E2EE, share link, camo toggle
+│   │   ├── KnockModal.tsx         # Panel otorisasi handshake izin masuk tamu untuk root host
+│   │   ├── MatrixRain.tsx         # Background canvas animasi rain binary/katakana subtle
+│   │   ├── ParticipantSidebar.tsx # Daftar node aktif yang tersinkronisasi di mesh
+│   │   └── SecurityModal.tsx      # Dialog inspektur Safety Number & Emoji Anti-MITM
 │   ├── pages/
-│   │   ├── Home.tsx               # Beranda pembuatan room dan masukan undangan
-│   │   └── Room.tsx               # Orkestrasi sesi room obrolan dan status koneksi
+│   │   ├── Home.tsx               # Terminal inisialisasi room baru dan token injector
+│   │   └── Room.tsx               # Orkestrator room chat, state P2P, dan life-cycle
 │   ├── services/
-│   │   └── peerService.ts         # Mesin P2P WebRTC DataChannel & enkripsi transmisi
+│   │   └── peerService.ts         # Mesin P2P WebRTC DataChannel star-relay & E2EE cipher
 │   ├── utils/
-│   │   ├── audio.ts               # Web Audio API synthesizer efek suara
-│   │   ├── colors.ts              # Utilitas warna inisial avatar peserta
-│   │   ├── crypto.ts              # Web Crypto API AES-GCM-256 & PBKDF2
-│   │   └── id.ts                  # Generator kode unik room
-│   ├── App.tsx                    # Komponen root dan routing query state
-│   ├── index.css                  # Styling Tailwind v4 dan accessibility focus ring
-│   ├── main.tsx                   # Titik masuk aplikasi React
-│   └── types.ts                   # Definisi tipe TypeScript
-├── DESIGN.md                      # Spesifikasi arah visual dan pedoman anti-slop
-├── package.json                   # Dependensi proyek
+│   │   ├── audio.ts               # Web Audio API synthesizer efek suara retro-futuristik
+│   │   ├── clipboard.ts           # Resilient clipboard copy dengan fallback universal
+│   │   ├── colors.ts              # Utilitas warna & inisial callsign avatar
+│   │   ├── crypto.ts              # Web Crypto API AES-GCM-256, PBKDF2 & Safety Fingerprint
+│   │   ├── crypto.test.ts         # Automated Vitest test suite untuk integritas kriptografi
+│   │   ├── id.ts                  # Generator token room unik
+│   │   └── utils.test.ts          # Automated unit test untuk ID & color utilities
+│   ├── App.tsx                    # Komponen root & query hash routing
+│   ├── index.css                  # Tailwind v4, CRT scanlines, zero border-radius & glow
+│   ├── main.tsx                   # Entry point React
+│   └── types.ts                   # Type definitions TypeScript
+├── DESIGN.md                      # Spesifikasi desain Cyberpunk Hacker Terminal
+├── package.json                   # Dependensi & script test
 ├── tsconfig.json                  # Konfigurasi TypeScript
-├── vite.config.ts                 # Konfigurasi Vite bundler
-└── README.md                      # Dokumentasi proyek
+├── vite.config.ts                 # Konfigurasi bundler Vite
+└── README.md                      # Dokumentasi komprehensif proyek
 ```
 
 ---

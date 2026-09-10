@@ -11,6 +11,17 @@ export interface EncryptedData {
   ciphertext: string; // Base64
 }
 
+// Get standard Web Crypto API instance (browser or Node.js)
+function getCrypto(): Crypto {
+  if (typeof window !== 'undefined' && window.crypto) {
+    return window.crypto;
+  }
+  if (typeof globalThis !== 'undefined' && globalThis.crypto) {
+    return globalThis.crypto;
+  }
+  throw new Error('Web Crypto API is not supported in this environment');
+}
+
 // Convert Uint8Array to Base64
 function arrayBufferToBase64(buffer: ArrayBuffer | Uint8Array): string {
   const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
@@ -33,8 +44,9 @@ function base64ToUint8Array(base64: string): Uint8Array {
 
 // Derive a strong 256-bit AES-GCM key from room secret and salt using PBKDF2
 export async function deriveRoomKey(roomSecret: string, roomId: string): Promise<CryptoKey> {
+  const crypto = getCrypto();
   const enc = new TextEncoder();
-  const keyMaterial = await window.crypto.subtle.importKey(
+  const keyMaterial = await crypto.subtle.importKey(
     'raw',
     enc.encode(roomSecret),
     'PBKDF2',
@@ -45,7 +57,7 @@ export async function deriveRoomKey(roomSecret: string, roomId: string): Promise
   // Use roomId as deterministic salt
   const salt = enc.encode(`anonchat-salt-${roomId}`);
 
-  return window.crypto.subtle.deriveKey(
+  return crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
       salt,
@@ -61,10 +73,11 @@ export async function deriveRoomKey(roomSecret: string, roomId: string): Promise
 
 // Encrypt plaintext string to AES-GCM (Ciphertext + 12-byte IV)
 export async function encryptText(plaintext: string, key: CryptoKey): Promise<EncryptedData> {
+  const crypto = getCrypto();
   const enc = new TextEncoder();
-  const iv = window.crypto.getRandomValues(new Uint8Array(12)); // 96-bit random IV for AES-GCM
+  const iv = crypto.getRandomValues(new Uint8Array(12)); // 96-bit random IV for AES-GCM
 
-  const encryptedBuffer = await window.crypto.subtle.encrypt(
+  const encryptedBuffer = await crypto.subtle.encrypt(
     {
       name: 'AES-GCM',
       iv: iv as unknown as BufferSource,
@@ -81,11 +94,12 @@ export async function encryptText(plaintext: string, key: CryptoKey): Promise<En
 
 // Decrypt AES-GCM ciphertext back to plaintext string
 export async function decryptText(encrypted: EncryptedData, key: CryptoKey): Promise<string> {
+  const crypto = getCrypto();
   const dec = new TextDecoder();
   const iv = base64ToUint8Array(encrypted.iv);
   const ciphertext = base64ToUint8Array(encrypted.ciphertext);
 
-  const decryptedBuffer = await window.crypto.subtle.decrypt(
+  const decryptedBuffer = await crypto.subtle.decrypt(
     {
       name: 'AES-GCM',
       iv: iv as unknown as BufferSource,
@@ -98,14 +112,30 @@ export async function decryptText(encrypted: EncryptedData, key: CryptoKey): Pro
 }
 
 // Generate deterministic 6-digit Safety Number & 4 Emoji Fingerprint
+// Cryptographically binds the actual derived AES-GCM key to prevent MITM and detect key mismatch
 export async function generateSafetyFingerprint(
   key: CryptoKey,
   roomId: string
 ): Promise<{ digits: string; emojis: string[] }> {
+  const crypto = getCrypto();
   const enc = new TextEncoder();
-  // Hash room and key context using SHA-256
-  const data = enc.encode(`safety-fingerprint-${roomId}`);
-  const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+
+  // Encrypt a fixed verification challenge using the key with a zero-IV.
+  // This produces a deterministic authentication tag uniquely tied to this specific key.
+  const challenge = enc.encode(`ANONCHAT_SAFETY_VERIFICATION_VECTOR:${roomId}`);
+  const zeroIv = new Uint8Array(12);
+
+  const tagBuffer = await crypto.subtle.encrypt(
+    {
+      name: 'AES-GCM',
+      iv: zeroIv,
+    },
+    key,
+    challenge
+  );
+
+  // Hash the resulting key-bound ciphertext tag with SHA-256
+  const hashBuffer = await crypto.subtle.digest('SHA-256', tagBuffer);
   const hashBytes = new Uint8Array(hashBuffer);
 
   // Generate 6-digit code: XXX XXX
@@ -126,7 +156,8 @@ export async function generateSafetyFingerprint(
 
 // Generate random high-entropy room secret
 export function generateRoomSecret(): string {
+  const crypto = getCrypto();
   const array = new Uint8Array(16);
-  window.crypto.getRandomValues(array);
+  crypto.getRandomValues(array);
   return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
 }

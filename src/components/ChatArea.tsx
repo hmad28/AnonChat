@@ -22,21 +22,25 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
 }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const [now, setNow] = useState(Date.now());
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+  const onExpireRef = useRef(onExpireMessage);
+  onExpireRef.current = onExpireMessage;
 
   useEffect(() => {
     const timer = setInterval(() => {
       const currentTime = Date.now();
       setNow(currentTime);
 
-      messages.forEach((msg) => {
+      messagesRef.current.forEach((msg) => {
         if (msg.expiresAt && currentTime >= msg.expiresAt) {
-          onExpireMessage(msg.id);
+          onExpireRef.current(msg.id);
         }
       });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [messages, onExpireMessage]);
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });

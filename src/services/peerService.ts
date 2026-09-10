@@ -15,6 +15,7 @@ export interface PeerServiceCallbacks {
   onRoomDissolved?: (reason?: string) => void;
   onTypingUpdated?: (senderId: string, nickname: string, isTyping: boolean) => void;
   onKeyReady?: (key: CryptoKey) => void;
+  onApproved?: (roomSecret: string) => void;
 }
 
 export class PeerService {
@@ -299,7 +300,19 @@ export class PeerService {
 
       this.peer.on('error', (err) => {
         console.error('Guest Peer error:', err);
-        this.callbacks.onStatusChange?.('error', 'Gagal menginisialisasi koneksi P2P');
+        if (err.type === 'peer-unavailable') {
+          this.callbacks.onStatusChange?.(
+            'error',
+            'Host tidak ditemukan. Pastikan Room ID tepat dan Host masih aktif di peramban.'
+          );
+        } else if (err.type === 'network') {
+          this.callbacks.onStatusChange?.(
+            'error',
+            'Gangguan koneksi internet atau firewall memblokir protokol WebRTC.'
+          );
+        } else {
+          this.callbacks.onStatusChange?.('error', err.message || 'Gagal menginisialisasi koneksi P2P');
+        }
         reject(err);
       });
     });
@@ -308,6 +321,7 @@ export class PeerService {
   private async handleHostData(payload: P2PPayload) {
     if (payload.type === 'APPROVE') {
       this.roomSecret = payload.roomSecret;
+      this.callbacks.onApproved?.(payload.roomSecret);
       // Derive 256-bit AES-GCM key upon approval
       this.cryptoKey = await deriveRoomKey(payload.roomSecret, this.hostPeerId);
       this.callbacks.onKeyReady?.(this.cryptoKey);
@@ -352,7 +366,7 @@ export class PeerService {
   // -------------------------------------------------------------
   async sendMessage(text: string, vanishDuration: number = 0) {
     const trimmed = text.trim();
-    if (!trimmed || !this.cryptoKey) return;
+    if (!trimmed || !this.cryptoKey || trimmed.length > 2000) return;
 
     const now = Date.now();
     const chatMsg: ChatMessage = {

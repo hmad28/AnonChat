@@ -22,18 +22,24 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, onTyping })
   const [vanishDuration, setVanishDuration] = useState<number>(0);
 
   const typingTimeoutRef = useRef<number | null>(null);
+  const isTypingActiveRef = useRef<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
 
-    onTyping(true);
+    if (!isTypingActiveRef.current) {
+      isTypingActiveRef.current = true;
+      onTyping(true);
+    }
+
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
     typingTimeoutRef.current = setTimeout(() => {
+      isTypingActiveRef.current = false;
       onTyping(false);
-    }, 1200);
+    }, 1500);
   };
 
   const handleSend = (e?: React.FormEvent) => {
@@ -42,6 +48,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, onTyping })
 
     onSendMessage(text, vanishDuration);
     setText('');
+    isTypingActiveRef.current = false;
     onTyping(false);
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
@@ -151,6 +158,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, onTyping })
                 ? `[BURN_AFTER_${VANISH_OPTIONS.find((v) => v.seconds === vanishDuration)?.label}] Masukkan payload rahasia...`
                 : 'Ketik payload pesan terenkripsi AES-256...'
             }
+            maxLength={2000}
             className="w-full h-11 bg-transparent text-[#E0E6ED] placeholder-[#4B5563] text-xs px-2.5 transition outline-none font-mono"
             autoFocus
           />

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Check, Copy, X, Lock, Key } from 'lucide-react';
+import { copyToClipboard } from '../utils/clipboard';
 
 interface SecurityModalProps {
   isOpen: boolean;
@@ -18,16 +19,18 @@ export const SecurityModal: React.FC<SecurityModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleCopy = () => {
+  const handleCopy = async () => {
     if (!safetyData) return;
     const text = `ANONCHAT_SAFETY_CODE (${roomId}): ${safetyData.digits} [${safetyData.emojis.join(' ')}]`;
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    const ok = await copyToClipboard(text);
+    if (ok) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0B0E14]/85 backdrop-blur-sm font-mono crt-overlay">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0B0E14]/85 backdrop-blur-sm font-mono">
       <div className="w-full max-w-md bg-[#05070A] border-2 border-[#00FF66] p-6 shadow-[0_0_25px_rgba(0,255,102,0.2)] space-y-5 relative">
         {/* Corner markers */}
         <div className="absolute top-0 left-0 text-[#00FF66] text-xs leading-none -translate-x-1 -translate-y-1 select-none">[+]</div>

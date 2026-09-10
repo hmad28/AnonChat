@@ -102,6 +102,11 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
           console.error('Failed to generate safety fingerprint:', e);
         }
       },
+      onApproved: (secret: string) => {
+        const url = new URL(window.location.href);
+        url.hash = `key=${secret}`;
+        window.history.replaceState({}, '', url.toString());
+      },
     });
 
     peerServiceRef.current = service;
@@ -147,10 +152,12 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
     if (isHost) {
       if (confirm('TERMINATE_ROOM: Yakin ingin membubarkan room ini? Seluruh koneksi peer akan diputus dan seluruh buffer obrolan musnah total.')) {
         peerServiceRef.current?.destroy();
+        window.location.hash = '';
         onBackToHome();
       }
     } else {
       peerServiceRef.current?.destroy();
+      window.location.hash = '';
       onBackToHome();
     }
   };

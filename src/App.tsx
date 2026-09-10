@@ -31,14 +31,15 @@ export function App() {
   const handleBackToHome = () => {
     setCurrentRoom(null);
     setInitialJoinRoomId('');
-    // Clear room query parameter
+    // Clear room query parameter and key hash
     const url = new URL(window.location.href);
     url.searchParams.delete('room');
+    url.hash = '';
     window.history.pushState({}, '', url.pathname);
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-[#0B0E14] text-[#E0E6ED] selection:bg-[#00FF66] selection:text-[#0B0E14]">
       {currentRoom ? (
         <Room
           roomId={currentRoom.roomId}

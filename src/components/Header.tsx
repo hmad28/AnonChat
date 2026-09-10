@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Copy, Check, Volume2, VolumeX, Users, Eye, EyeOff, XOctagon } from 'lucide-react';
 import { sound } from '../utils/audio';
 import { GuyFawkesIcon } from './GuyFawkesIcon';
+import { copyToClipboard } from '../utils/clipboard';
 
 interface HeaderProps {
   roomId: string;
@@ -29,11 +30,13 @@ export const Header: React.FC<HeaderProps> = ({
   const [copied, setCopied] = useState(false);
   const [soundMuted, setSoundMuted] = useState(!sound.enabled);
 
-  const copyRoomLink = () => {
+  const copyRoomLink = async () => {
     const url = window.location.href;
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    const ok = await copyToClipboard(url);
+    if (ok) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   const toggleSound = () => {
