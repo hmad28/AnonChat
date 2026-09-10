@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ShieldCheck, UserCheck, MessageSquare, Flame } from 'lucide-react';
+import { ShieldCheck, Flame, Terminal, Cpu } from 'lucide-react';
 import { ChatMessage } from '../types';
-import { getInitials } from '../utils/colors';
+import { MatrixRain } from './MatrixRain';
 
 interface ChatAreaProps {
   messages: ChatMessage[];
@@ -43,127 +43,111 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
   }, [messages, typingUsers]);
 
   const formatTime = (ts: number) => {
-    return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return new Date(ts).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-950">
+    <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-[#0B0E14] relative font-mono">
+      {/* Background Matrix Rain */}
+      <MatrixRain opacity={0.06} />
+
       {/* Purposeful Security Banner */}
-      <div className="mx-auto max-w-md bg-slate-900 border border-slate-800 rounded-xl p-3 text-center space-y-1">
-        <div className="flex items-center justify-center space-x-1.5 text-xs font-semibold text-emerald-400">
-          <ShieldCheck className="w-4 h-4" />
-          <span>Koneksi Langsung P2P (Terenkripsi AES-GCM 256-bit)</span>
+      <div className="mx-auto max-w-lg border border-[#1F2937] bg-[#05070A]/90 p-3 text-center space-y-1 relative z-10">
+        <div className="flex items-center justify-center space-x-1.5 text-xs font-bold text-[#00FF66]">
+          <ShieldCheck className="w-3.5 h-3.5" />
+          <span>[ P2P_DATALINK_ESTABLISHED: AES-GCM-256_ACTIVE ]</span>
         </div>
-        <p className="text-xs text-slate-400 leading-normal">
-          Pesan hanya disimpan di memori kerja dan akan terhapus saat room ditutup.{' '}
+        <p className="text-[11px] text-[#8A99AD]">
+          Memori bersifat volatil. Pesan dihapus instan saat room dibubarkan.{' '}
           <button
             type="button"
             onClick={onOpenSecurityModal}
-            className="text-indigo-400 hover:text-indigo-300 underline font-medium"
+            className="text-[#00F0FF] hover:underline font-bold"
           >
-            Verifikasi Kode Keamanan
+            [ VERIFY_SAFETY_FINGERPRINT ]
           </button>
         </p>
       </div>
 
       {messages.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 text-center space-y-2.5">
-          <div className="w-12 h-12 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400">
-            <MessageSquare className="w-6 h-6" />
+        <div className="flex flex-col items-center justify-center py-20 text-center space-y-3 relative z-10">
+          <div className="border border-[#1F2937] bg-[#05070A] p-3 text-[#00FF66]">
+            <Terminal className="w-6 h-6" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-sm font-semibold text-slate-200">Ruang Obrolan Siap</h3>
-            <p className="text-xs text-slate-400 max-w-xs">
-              Mulai mengetik pesan atau bagikan tautan room kepada rekan bicara Anda.
+            <div className="text-xs font-bold text-[#E0E6ED] uppercase tracking-wider">
+              &gt; TERMINAL_BUFFER_EMPTY
+            </div>
+            <p className="text-[11px] text-[#8A99AD] max-w-xs">
+              Mulai transmisi payload atau bagikan link node ini kepada peer Anda.
             </p>
           </div>
         </div>
       )}
 
-      {messages.map((msg) => {
-        if (msg.type === 'system') {
-          return (
-            <div key={msg.id} className="flex justify-center my-2">
-              <span className="flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-xs text-slate-300">
-                <UserCheck className="w-3.5 h-3.5 text-slate-400" />
-                <span>{msg.text}</span>
-                <span className="text-[10px] text-slate-500 font-mono">
-                  {formatTime(msg.timestamp)}
+      <div className="space-y-3 relative z-10">
+        {messages.map((msg) => {
+          if (msg.type === 'system') {
+            return (
+              <div key={msg.id} className="flex justify-center my-2 text-[11px]">
+                <span className="border border-[#1F2937] bg-[#05070A] px-3 py-1 text-[#8A99AD] flex items-center space-x-1.5">
+                  <Cpu className="w-3 h-3 text-[#00F0FF]" />
+                  <span>&gt;&gt; {msg.text}</span>
+                  <span className="text-[#374151]">[{formatTime(msg.timestamp)}]</span>
                 </span>
-              </span>
+              </div>
+            );
+          }
+
+          const isMe = msg.senderId === currentUserId;
+          const remainingSeconds = msg.expiresAt ? Math.max(0, Math.ceil((msg.expiresAt - now) / 1000)) : null;
+
+          return (
+            <div
+              key={msg.id}
+              className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
+            >
+              <div
+                className={`max-w-[90%] sm:max-w-md border bg-[#05070A] p-3 transition-all ${
+                  isMe
+                    ? 'border-l-4 border-l-[#00FF66] border-[#1F2937]'
+                    : 'border-l-4 border-l-[#00F0FF] border-[#1F2937]'
+                } ${
+                  isStealthMode ? 'blur-md hover:blur-none select-none hover:select-text cursor-pointer' : ''
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3 text-[11px] mb-1.5 border-b border-[#1F2937]/60 pb-1">
+                  <span className={`font-bold ${isMe ? 'text-[#00FF66]' : 'text-[#00F0FF]'}`}>
+                    &gt; {isMe ? 'YOU' : msg.senderName}
+                  </span>
+
+                  <div className="flex items-center space-x-2">
+                    {remainingSeconds !== null && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1 py-0.2 bg-[#FF003C]/10 text-[#FF003C] border border-[#FF003C]/40">
+                        <Flame className="w-2.5 h-2.5" />
+                        <span>[BURN: {remainingSeconds}s]</span>
+                      </span>
+                    )}
+                    <span className="text-[10px] text-[#8A99AD]">
+                      [{formatTime(msg.timestamp)}]
+                    </span>
+                  </div>
+                </div>
+
+                <p className="text-xs break-words whitespace-pre-wrap leading-relaxed text-[#E0E6ED]">
+                  {msg.text}
+                </p>
+              </div>
             </div>
           );
-        }
-
-        const isMe = msg.senderId === currentUserId;
-        const remainingSeconds = msg.expiresAt ? Math.max(0, Math.ceil((msg.expiresAt - now) / 1000)) : null;
-
-        return (
-          <div
-            key={msg.id}
-            className={`flex items-end space-x-2.5 ${isMe ? 'justify-end' : 'justify-start'}`}
-          >
-            {!isMe && (
-              <div
-                className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
-                  msg.color || 'bg-slate-800 text-white'
-                }`}
-                title={msg.senderName}
-              >
-                {getInitials(msg.senderName)}
-              </div>
-            )}
-
-            <div
-              className={`max-w-[85%] sm:max-w-md md:max-w-lg rounded-xl px-4 py-2.5 transition-all ${
-                isStealthMode ? 'blur-md hover:blur-none select-none hover:select-text cursor-pointer' : ''
-              } ${
-                isMe
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-slate-900 border border-slate-800 text-slate-100'
-              }`}
-            >
-              <div className="flex items-center justify-between gap-3 mb-1">
-                {!isMe ? (
-                  <span className="text-xs font-semibold text-indigo-300">
-                    {msg.senderName}
-                  </span>
-                ) : (
-                  <span />
-                )}
-
-                {remainingSeconds !== null && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800">
-                    <Flame className="w-3 h-3 text-amber-400" />
-                    <span>{remainingSeconds}s</span>
-                  </span>
-                )}
-              </div>
-
-              <p className="text-sm break-words whitespace-pre-wrap leading-relaxed font-normal">
-                {msg.text}
-              </p>
-
-              <div
-                className={`text-[10px] mt-1.5 flex justify-end font-mono ${
-                  isMe ? 'text-indigo-200' : 'text-slate-400'
-                }`}
-              >
-                {formatTime(msg.timestamp)}
-              </div>
-            </div>
-          </div>
-        );
-      })}
+        })}
+      </div>
 
       {/* Typing indicator */}
       {typingUsers.length > 0 && (
-        <div className="flex items-center space-x-2 text-xs text-slate-400 px-2">
-          <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse" />
-          <span>
-            {typingUsers.map((u) => u.nickname).join(', ')}{' '}
-            {typingUsers.length === 1 ? 'sedang mengetik' : 'sedang mengetik'}...
-          </span>
+        <div className="flex items-center space-x-1.5 text-xs text-[#00FF66] px-1 relative z-10">
+          <span>&gt; {typingUsers.map((u) => u.nickname).join(', ')} TRANSMITTING_PAYLOAD</span>
+          <span className="animate-pulse">_</span>
         </div>
       )}
 

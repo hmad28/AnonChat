@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Copy, Check, Volume2, VolumeX, LogOut, Users, Eye, EyeOff } from 'lucide-react';
+import { Copy, Check, Volume2, VolumeX, Users, Eye, EyeOff, XOctagon } from 'lucide-react';
 import { sound } from '../utils/audio';
+import { GuyFawkesIcon } from './GuyFawkesIcon';
 
 interface HeaderProps {
   roomId: string;
@@ -41,74 +42,78 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="h-16 border-b border-slate-800 bg-slate-900 px-4 flex items-center justify-between sticky top-0 z-30">
+    <header className="h-16 border-b-2 border-[#1F2937] bg-[#05070A] px-4 flex items-center justify-between sticky top-0 z-30 font-mono">
       <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-200">
-          <ShieldCheck className="w-5 h-5 text-indigo-400" />
-        </div>
+        <button
+          type="button"
+          onClick={onOpenSecurityModal}
+          className="border border-[#1F2937] bg-[#0B0E14] p-1.5 hover:border-[#00FF66] transition cursor-pointer"
+          title="Verifikasi Kriptografi E2EE"
+        >
+          <GuyFawkesIcon size={28} color="#00FF66" />
+        </button>
         <div>
           <div className="flex items-center space-x-2">
-            <span className="font-bold text-sm text-white tracking-tight">AnonChat</span>
+            <span className="font-bold text-xs tracking-wider text-white uppercase">ANONCHAT_OS</span>
             <button
               type="button"
               onClick={onOpenSecurityModal}
-              className="text-[11px] px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-750 text-emerald-400 font-mono font-medium border border-slate-700 transition"
-              title="Periksa Safety Number dan Status Kriptografi"
+              className="text-[10px] px-1.5 py-0.5 bg-[#00FF66]/10 text-[#00FF66] font-bold border border-[#00FF66]/40 hover:bg-[#00FF66]/20 transition cursor-pointer"
             >
-              E2EE Aktif
+              [ E2EE: AES-256 ]
             </button>
           </div>
-          <div className="flex items-center space-x-2 text-xs text-slate-400">
+          <div className="flex items-center space-x-2 text-[11px] text-[#8A99AD] mt-0.5">
             <span>
-              Room: <span className="font-mono text-slate-200 font-semibold">{roomId}</span>
+              NODE: <span className="text-[#00F0FF] font-bold">{roomId}</span>
             </span>
             {isHost && (
-              <span className="px-1.5 py-0.2 rounded bg-indigo-950 text-indigo-300 text-[10px] font-semibold border border-indigo-800">
-                PEMBUAT ROOM
+              <span className="px-1 text-[9px] bg-[#FF003C]/10 text-[#FF003C] border border-[#FF003C]/40 font-bold">
+                ROOT_HOST
               </span>
             )}
           </div>
         </div>
       </div>
 
-      <div className="flex items-center space-x-2">
-        {/* Stealth Mode */}
+      <div className="flex items-center space-x-2 text-xs">
+        {/* Camouflage / Stealth Mode */}
         <button
           type="button"
           onClick={onToggleStealthMode}
-          className={`h-9 px-3 text-xs font-medium rounded-lg border transition flex items-center space-x-1.5 ${
+          className={`h-9 px-2.5 font-bold border transition flex items-center space-x-1.5 ${
             isStealthMode
-              ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
-              : 'bg-slate-800 hover:bg-slate-750 border-slate-700 text-slate-300'
+              ? 'bg-[#FF003C]/20 border-[#FF003C] text-[#FF003C]'
+              : 'bg-[#0B0E14] hover:bg-[#111827] border-[#1F2937] text-[#8A99AD]'
           }`}
-          title={isStealthMode ? 'Matikan Mode Samaran (Esc)' : 'Nyalakan Mode Samaran (Esc)'}
+          title="Toggle Camo Mode (Esc)"
         >
-          {isStealthMode ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5 text-slate-400" />}
+          {isStealthMode ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5 text-[#8A99AD]" />}
           <span className="hidden md:inline">
-            {isStealthMode ? 'Samaran Aktif' : 'Samaran'}
+            {isStealthMode ? '[ CAMO_ACTIVE ]' : '[ CAMO ]'}
           </span>
         </button>
 
-        {/* Copy Invite Link */}
+        {/* Copy Link */}
         <button
           type="button"
           onClick={copyRoomLink}
-          className={`h-9 px-3 text-xs font-medium rounded-lg border transition flex items-center space-x-1.5 ${
+          className={`h-9 px-2.5 font-bold border transition flex items-center space-x-1.5 ${
             copied
-              ? 'bg-emerald-900/40 text-emerald-300 border-emerald-600'
-              : 'bg-slate-800 hover:bg-slate-750 text-slate-200 border-slate-700'
+              ? 'bg-[#00FF66]/20 text-[#00FF66] border-[#00FF66]'
+              : 'bg-[#0B0E14] hover:bg-[#111827] text-[#E0E6ED] border-[#1F2937]'
           }`}
-          title="Salin Tautan Undangan Terenkripsi"
+          title="Salin tautan room terenkripsi"
         >
           {copied ? (
             <>
-              <Check className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Tersalin</span>
+              <Check className="w-3.5 h-3.5 text-[#00FF66]" />
+              <span>[ COPIED ]</span>
             </>
           ) : (
             <>
-              <Copy className="w-3.5 h-3.5 text-slate-400" />
-              <span className="hidden sm:inline">Salin Link</span>
+              <Copy className="w-3.5 h-3.5 text-[#8A99AD]" />
+              <span className="hidden sm:inline">[ SHARE_LINK ]</span>
             </>
           )}
         </button>
@@ -117,40 +122,36 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           type="button"
           onClick={toggleSound}
-          className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 transition"
-          title={soundMuted ? 'Nyalakan Efek Suara' : 'Bisukan Efek Suara'}
+          className="w-9 h-9 flex items-center justify-center border border-[#1F2937] bg-[#0B0E14] hover:bg-[#111827] text-[#8A99AD] hover:text-[#00FF66] transition"
+          title={soundMuted ? 'Nyalakan Audio' : 'Matikan Audio'}
         >
-          {soundMuted ? <VolumeX className="w-4 h-4 text-slate-500" /> : <Volume2 className="w-4 h-4 text-indigo-400" />}
+          {soundMuted ? <VolumeX className="w-4 h-4 text-[#8A99AD]" /> : <Volume2 className="w-4 h-4 text-[#00FF66]" />}
         </button>
 
-        {/* Participant Toggle */}
+        {/* Client Count */}
         <button
           type="button"
           onClick={onToggleSidebar}
-          className={`h-9 px-2.5 text-xs font-semibold rounded-lg border transition flex items-center space-x-1.5 ${
+          className={`h-9 px-2.5 font-bold border transition flex items-center space-x-1.5 ${
             isSidebarOpen
-              ? 'bg-indigo-950 border-indigo-700 text-indigo-300'
-              : 'bg-slate-800 hover:bg-slate-750 border-slate-700 text-slate-300'
+              ? 'bg-[#00F0FF]/20 border-[#00F0FF] text-[#00F0FF]'
+              : 'bg-[#0B0E14] hover:bg-[#111827] border-[#1F2937] text-[#8A99AD]'
           }`}
-          title="Daftar Anggota Room"
+          title="Daftar Node Terhubung"
         >
-          <Users className="w-3.5 h-3.5 text-indigo-400" />
-          <span>{participantCount}</span>
+          <Users className="w-3.5 h-3.5 text-[#00F0FF]" />
+          <span>[{participantCount}]</span>
         </button>
 
-        {/* Leave or Dissolve */}
+        {/* Terminate Session */}
         <button
           type="button"
           onClick={onLeaveOrDissolve}
-          className={`h-9 px-3 text-xs font-semibold rounded-lg border transition flex items-center space-x-1.5 ${
-            isHost
-              ? 'bg-rose-950/40 hover:bg-rose-950 text-rose-300 border-rose-800'
-              : 'bg-slate-800 hover:bg-slate-750 text-slate-300 border-slate-700'
-          }`}
-          title={isHost ? 'Bubarkan Room Ini' : 'Keluar dari Room'}
+          className="h-9 px-2.5 font-bold bg-[#FF003C]/10 hover:bg-[#FF003C] text-[#FF003C] hover:text-[#0B0E14] border border-[#FF003C]/50 transition flex items-center space-x-1"
+          title={isHost ? 'Musnahkan Room Ini' : 'Putuskan Koneksi'}
         >
-          <LogOut className="w-3.5 h-3.5 text-rose-400" />
-          <span className="hidden sm:inline">{isHost ? 'Bubarkan' : 'Keluar'}</span>
+          <XOctagon className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">{isHost ? '[ TERMINATE ]' : '[ DISCONNECT ]'}</span>
         </button>
       </div>
     </header>

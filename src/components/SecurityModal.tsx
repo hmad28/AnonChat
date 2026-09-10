@@ -20,64 +20,74 @@ export const SecurityModal: React.FC<SecurityModalProps> = ({
 
   const handleCopy = () => {
     if (!safetyData) return;
-    const text = `AnonChat Safety Code (${roomId}): ${safetyData.digits} ${safetyData.emojis.join(' ')}`;
+    const text = `ANONCHAT_SAFETY_CODE (${roomId}): ${safetyData.digits} [${safetyData.emojis.join(' ')}]`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl p-5 sm:p-6 shadow-2xl space-y-5">
-        <div className="flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0B0E14]/85 backdrop-blur-sm font-mono crt-overlay">
+      <div className="w-full max-w-md bg-[#05070A] border-2 border-[#00FF66] p-6 shadow-[0_0_25px_rgba(0,255,102,0.2)] space-y-5 relative">
+        {/* Corner markers */}
+        <div className="absolute top-0 left-0 text-[#00FF66] text-xs leading-none -translate-x-1 -translate-y-1 select-none">[+]</div>
+        <div className="absolute top-0 right-0 text-[#00FF66] text-xs leading-none translate-x-1 -translate-y-1 select-none">[+]</div>
+        <div className="absolute bottom-0 left-0 text-[#00FF66] text-xs leading-none -translate-x-1 translate-y-1 select-none">[+]</div>
+        <div className="absolute bottom-0 right-0 text-[#00FF66] text-xs leading-none translate-x-1 translate-y-1 select-none">[+]</div>
+
+        <div className="flex items-center justify-between border-b border-[#1F2937] pb-3">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-emerald-400">
-              <ShieldCheck className="w-5 h-5" />
+            <div className="w-8 h-8 border border-[#00FF66] bg-[#00FF66]/10 flex items-center justify-center text-[#00FF66]">
+              <ShieldCheck className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">Verifikasi Keamanan Kriptografi</h3>
-              <p className="text-xs text-slate-400">Enkripsi Berlapis: WebRTC DTLS dan AES-GCM-256</p>
+              <div className="text-xs font-bold text-white uppercase tracking-wider">
+                [ CIPHER_FINGERPRINT_VERIFICATION ]
+              </div>
+              <div className="text-[10px] text-[#8A99AD]">
+                STATUS: MULTI_LAYER_AIRGAP_P2P
+              </div>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"
+            className="w-8 h-8 flex items-center justify-center border border-[#1F2937] hover:border-[#FF003C] text-[#8A99AD] hover:text-[#FF003C] transition cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Security protocol overview */}
+        {/* Cryptographic breakdown */}
         <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-            <div className="flex items-center space-x-1.5 text-emerald-400 font-semibold text-[11px]">
-              <Lock className="w-3.5 h-3.5" />
-              <span>Lapisan Aplikasi</span>
+          <div className="p-3 border border-[#1F2937] bg-[#0B0E14] space-y-1">
+            <div className="flex items-center space-x-1 text-[#00FF66] font-bold text-[10px]">
+              <Lock className="w-3 h-3" />
+              <span>APPLICATION_LAYER</span>
             </div>
-            <p className="text-xs text-slate-200 font-mono font-medium">AES-GCM 256-bit</p>
-            <p className="text-[11px] text-slate-400">Web Crypto API native</p>
+            <div className="text-xs text-white font-bold">AES-GCM 256-BIT</div>
+            <div className="text-[10px] text-[#8A99AD]">WebCrypto Native API</div>
           </div>
 
-          <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
-            <div className="flex items-center space-x-1.5 text-indigo-400 font-semibold text-[11px]">
-              <Key className="w-3.5 h-3.5" />
-              <span>Lapisan Jaringan</span>
+          <div className="p-3 border border-[#1F2937] bg-[#0B0E14] space-y-1">
+            <div className="flex items-center space-x-1 text-[#00F0FF] font-bold text-[10px]">
+              <Key className="w-3 h-3" />
+              <span>TRANSPORT_LAYER</span>
             </div>
-            <p className="text-xs text-slate-200 font-mono font-medium">WebRTC DTLS / SCTP</p>
-            <p className="text-[11px] text-slate-400">Saluran langsung P2P</p>
+            <div className="text-xs text-white font-bold">WEBRTC DTLS/SCTP</div>
+            <div className="text-[10px] text-[#8A99AD]">Direct Browser Wire</div>
           </div>
         </div>
 
         {/* Safety Number display */}
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-center space-y-3">
-          <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-            Safety Number dan Sidik Jari Emoji
+        <div className="p-4 border border-[#1F2937] bg-[#0B0E14] text-center space-y-3">
+          <div className="text-[10px] font-bold text-[#00F0FF] uppercase tracking-wider">
+            &gt;&gt; SAFETY_NUMBER_&amp;_EMOJI_HASH
           </div>
 
           {safetyData ? (
             <div className="space-y-2">
-              <div className="text-2xl font-mono font-bold tracking-widest text-white">
+              <div className="text-2xl font-bold tracking-widest text-[#00FF66] terminal-glow">
                 {safetyData.digits}
               </div>
               <div className="text-2xl tracking-widest select-none py-1">
@@ -85,28 +95,28 @@ export const SecurityModal: React.FC<SecurityModalProps> = ({
               </div>
             </div>
           ) : (
-            <div className="text-xs text-slate-500 py-3">Menghitung kode keamanan...</div>
+            <div className="text-xs text-[#8A99AD] py-3">Menghitung hash kriptografi...</div>
           )}
 
-          <p className="text-xs text-slate-400 leading-normal max-w-xs mx-auto">
-            Bandingkan kode 6 angka dan deretan emoji di atas dengan rekan bicara Anda. Jika identik, koneksi terjamin bebas dari penyusup pihak ketiga.
+          <p className="text-[11px] text-[#8A99AD] leading-relaxed max-w-xs mx-auto">
+            Bandingkan kode 6 angka dan deretan emoji di atas dengan rekan bicara Anda. Jika identik, koneksi dijamin 100% bebas dari intipan pihak ketiga (Anti-MITM).
           </p>
 
           <button
             type="button"
             onClick={handleCopy}
             disabled={!safetyData}
-            className="h-9 px-3 text-xs font-semibold rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 transition inline-flex items-center space-x-1.5"
+            className="h-9 px-3 text-xs font-bold border border-[#00FF66] bg-[#00FF66]/10 hover:bg-[#00FF66] text-[#00FF66] hover:text-[#0B0E14] transition inline-flex items-center space-x-1.5 cursor-pointer"
           >
             {copied ? (
               <>
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Tersalin ke Papan Klip</span>
+                <Check className="w-3.5 h-3.5" />
+                <span>[ COPIED_TO_CLIPBOARD ]</span>
               </>
             ) : (
               <>
-                <Copy className="w-3.5 h-3.5 text-slate-400" />
-                <span>Salin Kode Keamanan</span>
+                <Copy className="w-3.5 h-3.5" />
+                <span>[ COPY_SAFETY_CODE ]</span>
               </>
             )}
           </button>
@@ -115,9 +125,9 @@ export const SecurityModal: React.FC<SecurityModalProps> = ({
         <button
           type="button"
           onClick={onClose}
-          className="w-full h-10 bg-slate-800 hover:bg-slate-750 text-white font-medium text-xs rounded-xl transition"
+          className="w-full h-10 border border-[#1F2937] bg-[#111827] hover:bg-[#1F2937] text-white font-bold text-xs uppercase tracking-wider transition cursor-pointer"
         >
-          Tutup
+          [ CLOSE_INSPECTOR ]
         </button>
       </div>
     </div>

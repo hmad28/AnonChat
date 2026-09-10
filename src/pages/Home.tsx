@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Plus, ArrowRight, Lock, Trash2, Users } from 'lucide-react';
+import { Terminal, Shield, Key, ArrowRight, CornerDownRight, Binary, Cpu } from 'lucide-react';
 import { generateRoomId } from '../utils/id';
+import { GuyFawkesIcon } from '../components/GuyFawkesIcon';
+import { MatrixRain } from '../components/MatrixRain';
 
 interface HomeProps {
   onStartRoom: (roomId: string, nickname: string, isHost: boolean) => void;
@@ -15,7 +17,7 @@ export const Home: React.FC<HomeProps> = ({ onStartRoom, initialRoomId }) => {
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    const finalNick = hostNick.trim() || `Host (${Math.floor(100 + Math.random() * 900)})`;
+    const finalNick = hostNick.trim() || `ANON_${Math.floor(100 + Math.random() * 900)}`;
     const newRoomId = generateRoomId();
     onStartRoom(newRoomId, finalNick, true);
   };
@@ -36,139 +38,173 @@ export const Home: React.FC<HomeProps> = ({ onStartRoom, initialRoomId }) => {
       }
     } catch {}
 
-    const finalNick = guestNick.trim() || `Tamu (${Math.floor(100 + Math.random() * 900)})`;
+    const finalNick = guestNick.trim() || `GUEST_${Math.floor(100 + Math.random() * 900)}`;
     onStartRoom(parsedRoomId, finalNick, false);
   };
 
   return (
-    <main className="min-h-screen flex flex-col justify-center items-center px-4 py-10 bg-slate-950 text-slate-100">
-      <div className="w-full max-w-md space-y-7">
-        {/* Brand Header */}
-        <div className="text-center space-y-2.5">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 text-indigo-400 mb-1">
-            <ShieldCheck className="w-6 h-6" />
+    <main className="min-h-screen relative flex flex-col justify-center items-center px-4 py-10 bg-[#0B0E14] text-[#E0E6ED] crt-overlay overflow-hidden">
+      {/* Background Matrix Rain */}
+      <MatrixRain opacity={0.12} />
+
+      <div className="w-full max-w-lg space-y-6 relative z-10">
+        {/* Terminal Header */}
+        <div className="border border-[#1F2937] bg-[#05070A]/90 p-5 shadow-2xl relative">
+          {/* Corner crosshairs */}
+          <div className="absolute top-0 left-0 text-[#00FF66] text-[10px] leading-none -translate-x-1 -translate-y-1 select-none">+</div>
+          <div className="absolute top-0 right-0 text-[#00FF66] text-[10px] leading-none translate-x-1 -translate-y-1 select-none">+</div>
+          <div className="absolute bottom-0 left-0 text-[#00FF66] text-[10px] leading-none -translate-x-1 translate-y-1 select-none">+</div>
+          <div className="absolute bottom-0 right-0 text-[#00FF66] text-[10px] leading-none translate-x-1 translate-y-1 select-none">+</div>
+
+          <div className="flex items-center justify-between border-b border-[#1F2937] pb-3 mb-4">
+            <div className="flex items-center space-x-2.5">
+              <GuyFawkesIcon size={32} color="#00FF66" />
+              <div>
+                <div className="text-xs font-bold tracking-widest text-[#00FF66] uppercase terminal-glow">
+                  ANONCHAT // NET_TERMINAL
+                </div>
+                <div className="text-[10px] text-[#8A99AD] font-mono">
+                  SECURITY_LEVEL: AIRGAP_VOLATILE // E2EE
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center space-x-1 text-[10px] font-mono text-[#00F0FF] bg-[#00F0FF]/10 px-2 py-0.5 border border-[#00F0FF]/30">
+              <span className="w-1.5 h-1.5 bg-[#00FF66] animate-pulse" />
+              <span>NODE_READY</span>
+            </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            AnonChat
-          </h1>
-          <p className="text-sm text-slate-400 max-w-sm mx-auto leading-relaxed">
-            Ruang obrolan sementara berbasis koneksi langsung peramban. Tanpa penyimpanan data dan memerlukan izin pembuat room untuk bergabung.
+
+          <p className="text-xs text-[#8A99AD] leading-relaxed">
+            Sistem komunikasi terdesentralisasi murni Peer-to-Peer. Bebas jejak riwayat, zero database, dan seluruh koneksi tamu tunduk pada otorisasi langsung dari Root Host.
           </p>
         </div>
 
         {/* Action Panel */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl">
-          {/* Tab Switcher */}
-          <div className="grid grid-cols-2 p-1 bg-slate-950 rounded-xl border border-slate-800/80 mb-5">
+        <div className="border-2 border-[#1F2937] bg-[#05070A]/95 p-6 shadow-2xl relative">
+          {/* Mode Switcher */}
+          <div className="grid grid-cols-2 gap-2 mb-6 border-b border-[#1F2937] pb-4">
             <button
               type="button"
               onClick={() => setActiveTab('create')}
-              className={`h-10 text-xs font-semibold rounded-lg transition ${
+              className={`h-10 text-xs font-bold tracking-wider transition uppercase flex items-center justify-center space-x-1.5 ${
                 activeTab === 'create'
-                  ? 'bg-slate-800 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-[#00FF66] text-[#0B0E14] shadow-[0_0_12px_rgba(0,255,102,0.3)]'
+                  : 'bg-[#111827] text-[#8A99AD] hover:text-[#E0E6ED] border border-[#1F2937]'
               }`}
             >
-              Buka Room Baru
+              <Terminal className="w-3.5 h-3.5" />
+              <span>[ 01: INITIALIZE_ROOM ]</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('join')}
-              className={`h-10 text-xs font-semibold rounded-lg transition ${
+              className={`h-10 text-xs font-bold tracking-wider transition uppercase flex items-center justify-center space-x-1.5 ${
                 activeTab === 'join'
-                  ? 'bg-slate-800 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-[#00F0FF] text-[#0B0E14] shadow-[0_0_12px_rgba(0,240,255,0.3)]'
+                  : 'bg-[#111827] text-[#8A99AD] hover:text-[#E0E6ED] border border-[#1F2937]'
               }`}
             >
-              Masuk Lewat Undangan
+              <Key className="w-3.5 h-3.5" />
+              <span>[ 02: INJECT_TOKEN ]</span>
             </button>
           </div>
 
           {activeTab === 'create' ? (
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Nama Panggilan (Pembuat Room)
-                </label>
+                <div className="flex items-center justify-between text-xs font-mono text-[#8A99AD] mb-1.5">
+                  <span className="text-[#00FF66]">&gt; ROOT_CODENAME:</span>
+                  <span className="text-[10px] text-[#8A99AD]">[MAX_25_CHARS]</span>
+                </div>
                 <input
                   type="text"
-                  placeholder="Contoh: Kucing Hitam"
+                  placeholder="Contoh: PHANTOM_OPERATOR"
                   value={hostNick}
                   onChange={(e) => setHostNick(e.target.value)}
                   maxLength={25}
-                  className="w-full h-11 bg-slate-950 border border-slate-800 focus:border-indigo-500 text-slate-100 placeholder-slate-500 text-sm rounded-xl px-3.5 transition outline-none"
+                  className="w-full h-11 bg-[#0B0E14] border border-[#1F2937] focus:border-[#00FF66] text-[#00FF66] placeholder-[#374151] text-xs px-3.5 transition outline-none font-mono font-semibold"
                 />
-                <p className="text-[11px] text-slate-400 mt-1.5 leading-normal">
-                  Sebagai pembuat room, Anda memegang kendali penuh untuk menyetujui atau menolak setiap tamu yang ingin masuk.
-                </p>
+                <div className="text-[10px] text-[#8A99AD] mt-1.5 flex items-center gap-1">
+                  <CornerDownRight className="w-3 h-3 text-[#00FF66]" />
+                  <span>Anda bertindak sebagai Gatekeeper: hanya tamu yang Anda ACC yang bisa masuk.</span>
+                </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl flex items-center justify-center space-x-2 transition"
+                className="w-full h-12 bg-[#00FF66] hover:bg-[#00dd55] text-[#0B0E14] font-bold text-xs tracking-wider uppercase transition shadow-[0_0_15px_rgba(0,255,102,0.3)] flex items-center justify-center space-x-2 cursor-pointer"
               >
-                <Plus className="w-4 h-4" />
-                <span>Buat Room dan Dapatkan Link</span>
+                <span>[ EXECUTE: GENERATE_SECURE_ROOM ]</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
             </form>
           ) : (
             <form onSubmit={handleJoin} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Kode Room atau Tautan Undangan
-                </label>
+                <div className="flex items-center justify-between text-xs font-mono text-[#8A99AD] mb-1.5">
+                  <span className="text-[#00F0FF]">&gt; TARGET_ROOM_TOKEN_OR_URL:</span>
+                </div>
                 <input
                   type="text"
                   required
-                  placeholder="Tempel tautan atau ketik kode room"
+                  placeholder="Tempel tautan atau ketik kode room target..."
                   value={joinInput}
                   onChange={(e) => setJoinInput(e.target.value)}
-                  className="w-full h-11 bg-slate-950 border border-slate-800 focus:border-indigo-500 text-slate-100 placeholder-slate-500 text-sm rounded-xl px-3.5 transition outline-none font-mono"
+                  className="w-full h-11 bg-[#0B0E14] border border-[#1F2937] focus:border-[#00F0FF] text-[#00F0FF] placeholder-[#374151] text-xs px-3.5 transition outline-none font-mono"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Nama Panggilan Anda
-                </label>
+                <div className="flex items-center justify-between text-xs font-mono text-[#8A99AD] mb-1.5">
+                  <span className="text-[#00F0FF]">&gt; CALLSIGN_GUEST:</span>
+                </div>
                 <input
                   type="text"
-                  placeholder="Contoh: Budi"
+                  placeholder="Contoh: CIPHER_GUEST"
                   value={guestNick}
                   onChange={(e) => setGuestNick(e.target.value)}
                   maxLength={25}
-                  className="w-full h-11 bg-slate-950 border border-slate-800 focus:border-indigo-500 text-slate-100 placeholder-slate-500 text-sm rounded-xl px-3.5 transition outline-none"
+                  className="w-full h-11 bg-[#0B0E14] border border-[#1F2937] focus:border-[#00F0FF] text-[#E0E6ED] placeholder-[#374151] text-xs px-3.5 transition outline-none font-mono"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={!joinInput.trim()}
-                className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold text-sm rounded-xl flex items-center justify-center space-x-2 transition"
+                className="w-full h-12 bg-[#00F0FF] hover:bg-[#00cce6] disabled:opacity-40 text-[#0B0E14] font-bold text-xs tracking-wider uppercase transition shadow-[0_0_15px_rgba(0,240,255,0.3)] flex items-center justify-center space-x-2 cursor-pointer"
               >
-                <span>Ketuk Pintu (Minta Izin)</span>
+                <span>[ INITIATE_KNOCK: REQUEST_ENTRY ]</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
           )}
         </div>
 
-        {/* Technical Architecture Guarantees */}
-        <div className="grid grid-cols-3 gap-2.5">
-          <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl text-center space-y-1">
-            <Lock className="w-4 h-4 text-slate-300 mx-auto" />
-            <div className="text-xs font-semibold text-slate-200">Izin Masuk</div>
-            <div className="text-[10px] text-slate-400">Persetujuan host</div>
+        {/* Technical Architecture Specs Box */}
+        <div className="grid grid-cols-3 gap-2 text-[10px] font-mono">
+          <div className="p-2.5 border border-[#1F2937] bg-[#05070A]/80 space-y-0.5">
+            <div className="text-[#00FF66] font-bold flex items-center gap-1">
+              <Shield className="w-3 h-3" />
+              <span>CIPHER</span>
+            </div>
+            <div className="text-[#E0E6ED]">AES-GCM-256</div>
+            <div className="text-[#8A99AD]">WebCrypto Native</div>
           </div>
-          <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl text-center space-y-1">
-            <Trash2 className="w-4 h-4 text-slate-300 mx-auto" />
-            <div className="text-xs font-semibold text-slate-200">Nol Database</div>
-            <div className="text-[10px] text-slate-400">Musnah saat ditutup</div>
+          <div className="p-2.5 border border-[#1F2937] bg-[#05070A]/80 space-y-0.5">
+            <div className="text-[#00F0FF] font-bold flex items-center gap-1">
+              <Binary className="w-3 h-3" />
+              <span>STORAGE</span>
+            </div>
+            <div className="text-[#E0E6ED]">0x00_NONE</div>
+            <div className="text-[#8A99AD]">RAM Only / Volatile</div>
           </div>
-          <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl text-center space-y-1">
-            <Users className="w-4 h-4 text-slate-300 mx-auto" />
-            <div className="text-xs font-semibold text-slate-200">Koneksi P2P</div>
-            <div className="text-[10px] text-slate-400">Langsung antar peramban</div>
+          <div className="p-2.5 border border-[#1F2937] bg-[#05070A]/80 space-y-0.5">
+            <div className="text-[#FF003C] font-bold flex items-center gap-1">
+              <Cpu className="w-3 h-3" />
+              <span>NETWORK</span>
+            </div>
+            <div className="text-[#E0E6ED]">P2P_MESH</div>
+            <div className="text-[#8A99AD]">Zero Server Intermediary</div>
           </div>
         </div>
       </div>

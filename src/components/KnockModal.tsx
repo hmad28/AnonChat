@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserCheck, UserX, DoorOpen } from 'lucide-react';
+import { UserCheck, UserX, ShieldAlert } from 'lucide-react';
 import { KnockRequest } from '../types';
 
 interface KnockModalProps {
@@ -12,47 +12,47 @@ export const KnockModal: React.FC<KnockModalProps> = ({ knocks, onApprove, onRej
   if (knocks.length === 0) return null;
 
   return (
-    <div className="fixed top-20 right-4 left-4 sm:left-auto sm:w-96 z-40 space-y-2 pointer-events-none">
+    <div className="fixed top-20 right-4 left-4 sm:left-auto sm:w-96 z-40 space-y-3 pointer-events-none font-mono">
       {knocks.map((req) => (
         <div
           key={req.id}
-          className="pointer-events-auto bg-slate-900 border border-slate-700 rounded-2xl p-4 shadow-2xl"
+          className="pointer-events-auto bg-[#05070A] border-2 border-[#FF003C] p-4 shadow-[0_0_20px_rgba(255,0,60,0.3)] animate-in slide-in-from-top-4 duration-200"
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-indigo-400">
-                <DoorOpen className="w-5 h-5" />
+              <div className="w-10 h-10 border border-[#FF003C] bg-[#FF003C]/10 flex items-center justify-center text-[#FF003C] shrink-0">
+                <ShieldAlert className="w-5 h-5 animate-pulse" />
               </div>
               <div>
-                <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                  Permintaan Bergabung
+                <div className="text-[10px] font-bold text-[#FF003C] uppercase tracking-wider">
+                  [ INTRUSION_AUTH_REQUIRED ]
                 </div>
-                <div className="text-sm font-bold text-white">
-                  {req.nickname}
+                <div className="text-sm font-bold text-white mt-0.5">
+                  &gt; {req.nickname}
                 </div>
-                <div className="text-xs text-slate-400 mt-0.5">
-                  Menunggu izin Anda untuk masuk.
+                <div className="text-[11px] text-[#8A99AD]">
+                  Meminta izin handshake masuk ke room ini.
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="mt-3.5 pt-3 border-t border-slate-800 flex items-center gap-2 justify-end">
+          <div className="mt-3.5 pt-3 border-t border-[#1F2937] flex items-center gap-2 justify-end">
             <button
               type="button"
               onClick={() => onReject(req.id)}
-              className="h-9 px-3.5 text-xs font-semibold rounded-lg text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-750 border border-slate-700 transition flex items-center space-x-1.5"
+              className="h-9 px-3 text-xs font-bold text-[#FF003C] bg-[#FF003C]/10 hover:bg-[#FF003C] hover:text-[#0B0E14] border border-[#FF003C] transition flex items-center space-x-1 cursor-pointer"
             >
-              <UserX className="w-3.5 h-3.5 text-rose-400" />
-              <span>Tolak</span>
+              <UserX className="w-3.5 h-3.5" />
+              <span>[ DENY ]</span>
             </button>
             <button
               type="button"
               onClick={() => onApprove(req.id)}
-              className="h-9 px-4 text-xs font-semibold rounded-lg text-white bg-emerald-600 hover:bg-emerald-500 transition flex items-center space-x-1.5"
+              className="h-9 px-4 text-xs font-bold text-[#0B0E14] bg-[#00FF66] hover:bg-[#00dd55] transition flex items-center space-x-1 shadow-[0_0_10px_rgba(0,255,102,0.3)] cursor-pointer"
             >
               <UserCheck className="w-3.5 h-3.5" />
-              <span>Izinkan Masuk</span>
+              <span>[ GRANT_ACCESS ]</span>
             </button>
           </div>
         </div>

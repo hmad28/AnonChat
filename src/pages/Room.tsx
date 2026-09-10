@@ -10,6 +10,7 @@ import { ParticipantSidebar } from '../components/ParticipantSidebar';
 import { SecurityModal } from '../components/SecurityModal';
 import { getRandomColor } from '../utils/colors';
 import { generateSafetyFingerprint, generateRoomSecret } from '../utils/crypto';
+import { MatrixRain } from '../components/MatrixRain';
 
 interface RoomProps {
   roomId: string;
@@ -36,7 +37,7 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
   const peerServiceRef = useRef<PeerService | null>(null);
   const myColorRef = useRef<string>(getRandomColor());
 
-  // Escape key handler for Panic / Stealth Mode (R-32)
+  // Escape key handler for Panic / Stealth Mode
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -144,7 +145,7 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
 
   const handleLeaveOrDissolve = () => {
     if (isHost) {
-      if (confirm('Yakin ingin membubarkan room ini? Seluruh peserta akan terputus dan semua pesan akan terhapus permanen dari memori.')) {
+      if (confirm('TERMINATE_ROOM: Yakin ingin membubarkan room ini? Seluruh koneksi peer akan diputus dan seluruh buffer obrolan musnah total.')) {
         peerServiceRef.current?.destroy();
         onBackToHome();
       }
@@ -157,17 +158,22 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
   // 1. CONNECTING STATE
   if (status === 'connecting') {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-4 text-center space-y-4 bg-slate-950 text-slate-100">
-        <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-indigo-400">
-          <Loader2 className="w-6 h-6 animate-spin" />
-        </div>
-        <div>
-          <h2 className="text-base font-bold text-slate-100">Menghubungkan ke Jaringan P2P</h2>
-          <p className="text-xs text-slate-400 mt-1 max-w-xs">
-            {isHost
-              ? 'Menyiapkan kunci enkripsi AES-GCM 256-bit dan membuka room...'
-              : 'Menemukan alamat room pembuat sesi...'}
-          </p>
+      <main className="min-h-screen flex flex-col items-center justify-center p-4 text-center space-y-4 bg-[#0B0E14] text-[#E0E6ED] font-mono crt-overlay">
+        <MatrixRain opacity={0.15} />
+        <div className="border-2 border-[#00FF66] bg-[#05070A] p-6 shadow-[0_0_20px_rgba(0,255,102,0.2)] max-w-sm space-y-3 relative z-10">
+          <div className="w-10 h-10 border border-[#00FF66] bg-[#00FF66]/10 flex items-center justify-center text-[#00FF66] mx-auto">
+            <Loader2 className="w-5 h-5 animate-spin" />
+          </div>
+          <div>
+            <div className="text-xs font-bold text-[#00FF66] uppercase tracking-wider">
+              [ ESTABLISHING_P2P_MESH ]
+            </div>
+            <p className="text-[11px] text-[#8A99AD] mt-1">
+              {isHost
+                ? 'Deriving AES-GCM 256-bit crypto key and binding node socket...'
+                : 'Searching host peer coordinates...'}
+            </p>
+          </div>
         </div>
       </main>
     );
@@ -176,27 +182,30 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
   // 2. WAITING APPROVAL STATE (GUEST)
   if (status === 'waiting_approval') {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-4 text-center space-y-5 bg-slate-950 text-slate-100">
-        <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-amber-400">
-          <DoorOpen className="w-8 h-8" />
-        </div>
-        <div className="max-w-sm space-y-2">
-          <div className="inline-flex items-center px-2.5 py-0.5 rounded bg-amber-950 text-amber-300 text-xs font-semibold border border-amber-800">
-            Menunggu Persetujuan Pembuat Room
+      <main className="min-h-screen flex flex-col items-center justify-center p-4 text-center space-y-5 bg-[#0B0E14] text-[#E0E6ED] font-mono crt-overlay">
+        <MatrixRain opacity={0.15} />
+        <div className="border-2 border-[#00F0FF] bg-[#05070A] p-6 shadow-[0_0_20px_rgba(0,240,255,0.2)] max-w-md space-y-4 relative z-10">
+          <div className="w-12 h-12 border border-[#00F0FF] bg-[#00F0FF]/10 flex items-center justify-center text-[#00F0FF] mx-auto">
+            <DoorOpen className="w-6 h-6 animate-pulse" />
           </div>
-          <h2 className="text-xl font-bold text-white">Permintaan Masuk Terkirim</h2>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            Permintaan Anda sudah diteruskan kepada pembuat room <span className="font-mono text-slate-200 font-semibold">{roomId}</span>. Ruang obrolan akan terbuka seketika setelah diberikan izin.
-          </p>
-        </div>
+          <div className="space-y-1.5">
+            <div className="text-[10px] font-bold px-2 py-0.5 bg-[#00F0FF]/10 text-[#00F0FF] border border-[#00F0FF]/40 inline-block uppercase">
+              HANDSHAKE_REQUEST_TRANSMITTED
+            </div>
+            <h2 className="text-base font-bold text-white">&gt; MENUNGGU_OTORISASI_ROOT_HOST</h2>
+            <p className="text-xs text-[#8A99AD] leading-relaxed">
+              Permintaan masuk telah dikirimkan ke Root Host room <span className="text-[#00F0FF] font-bold">{roomId}</span>. Ruang chat akan terbuka otomatis segera setelah disetujui.
+            </p>
+          </div>
 
-        <button
-          type="button"
-          onClick={onBackToHome}
-          className="h-10 px-4 text-xs font-semibold text-slate-300 hover:text-white bg-slate-900 border border-slate-800 rounded-xl hover:bg-slate-850 transition"
-        >
-          Batalkan dan Kembali
-        </button>
+          <button
+            type="button"
+            onClick={onBackToHome}
+            className="h-10 px-5 text-xs font-bold text-[#E0E6ED] hover:text-white bg-[#0B0E14] border border-[#1F2937] hover:border-[#FF003C] hover:text-[#FF003C] transition cursor-pointer"
+          >
+            [ ABORT_REQUEST ]
+          </button>
+        </div>
       </main>
     );
   }
@@ -204,24 +213,29 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
   // 3. REJECTED STATE
   if (status === 'rejected') {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-4 text-center space-y-4 bg-slate-950 text-slate-100">
-        <div className="w-14 h-14 rounded-2xl bg-rose-950/60 border border-rose-800 flex items-center justify-center text-rose-400">
-          <ShieldAlert className="w-7 h-7" />
+      <main className="min-h-screen flex flex-col items-center justify-center p-4 text-center space-y-4 bg-[#0B0E14] text-[#E0E6ED] font-mono crt-overlay">
+        <MatrixRain opacity={0.15} />
+        <div className="border-2 border-[#FF003C] bg-[#05070A] p-6 shadow-[0_0_20px_rgba(255,0,60,0.3)] max-w-md space-y-3 relative z-10">
+          <div className="w-12 h-12 border border-[#FF003C] bg-[#FF003C]/10 flex items-center justify-center text-[#FF003C] mx-auto">
+            <ShieldAlert className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-sm font-bold text-[#FF003C] uppercase tracking-wider">
+              [ ACCESS_DENIED_BY_ROOT ]
+            </h2>
+            <p className="text-xs text-[#8A99AD]">
+              {errorMessage || 'Root Host menolak otorisasi handshake koneksi Anda ke room ini.'}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onBackToHome}
+            className="h-10 px-5 text-xs font-bold text-white bg-[#111827] hover:bg-[#1F2937] border border-[#1F2937] transition flex items-center space-x-2 mx-auto cursor-pointer"
+          >
+            <HomeIcon className="w-4 h-4" />
+            <span>[ RETURN_TO_TERMINAL ]</span>
+          </button>
         </div>
-        <div className="max-w-sm space-y-1.5">
-          <h2 className="text-lg font-bold text-white">Permintaan Masuk Ditolak</h2>
-          <p className="text-xs text-slate-400">
-            {errorMessage || 'Pembuat room menolak permintaan bergabung Anda ke dalam sesi obrolan ini.'}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onBackToHome}
-          className="h-10 px-5 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-xl transition flex items-center space-x-2"
-        >
-          <HomeIcon className="w-4 h-4" />
-          <span>Kembali ke Beranda</span>
-        </button>
       </main>
     );
   }
@@ -229,24 +243,29 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
   // 4. DISSOLVED STATE
   if (status === 'dissolved') {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-4 text-center space-y-4 bg-slate-950 text-slate-100">
-        <div className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-emerald-400">
-          <CheckCircle2 className="w-7 h-7" />
+      <main className="min-h-screen flex flex-col items-center justify-center p-4 text-center space-y-4 bg-[#0B0E14] text-[#E0E6ED] font-mono crt-overlay">
+        <MatrixRain opacity={0.15} />
+        <div className="border-2 border-[#00FF66] bg-[#05070A] p-6 shadow-[0_0_20px_rgba(0,255,102,0.2)] max-w-md space-y-3 relative z-10">
+          <div className="w-12 h-12 border border-[#00FF66] bg-[#00FF66]/10 flex items-center justify-center text-[#00FF66] mx-auto">
+            <CheckCircle2 className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+              [ SESSION_TERMINATED: MEMORY_PURGED ]
+            </h2>
+            <p className="text-xs text-[#8A99AD]">
+              {errorMessage || 'Room telah dibubarkan. Seluruh buffer pesan telah dihapus tuntas dari memori peramban.'}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onBackToHome}
+            className="h-10 px-5 text-xs font-bold text-[#0B0E14] bg-[#00FF66] hover:bg-[#00dd55] transition flex items-center space-x-2 mx-auto cursor-pointer shadow-[0_0_12px_rgba(0,255,102,0.3)]"
+          >
+            <HomeIcon className="w-4 h-4" />
+            <span>[ NEW_SESSION ]</span>
+          </button>
         </div>
-        <div className="max-w-sm space-y-1.5">
-          <h2 className="text-lg font-bold text-white">Room Telah Ditutup</h2>
-          <p className="text-xs text-slate-400">
-            {errorMessage || 'Sesi percakapan telah selesai. Seluruh riwayat obrolan telah terhapus total dari memori peramban.'}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onBackToHome}
-          className="h-10 px-5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl transition flex items-center space-x-2"
-        >
-          <HomeIcon className="w-4 h-4" />
-          <span>Buka Room Baru</span>
-        </button>
       </main>
     );
   }
@@ -254,24 +273,29 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
   // 5. ERROR STATE
   if (status === 'error') {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-4 text-center space-y-4 bg-slate-950 text-slate-100">
-        <div className="w-14 h-14 rounded-2xl bg-rose-950/60 border border-rose-800 flex items-center justify-center text-rose-400">
-          <AlertCircle className="w-7 h-7" />
+      <main className="min-h-screen flex flex-col items-center justify-center p-4 text-center space-y-4 bg-[#0B0E14] text-[#E0E6ED] font-mono crt-overlay">
+        <MatrixRain opacity={0.15} />
+        <div className="border-2 border-[#FF003C] bg-[#05070A] p-6 shadow-[0_0_20px_rgba(255,0,60,0.3)] max-w-md space-y-3 relative z-10">
+          <div className="w-12 h-12 border border-[#FF003C] bg-[#FF003C]/10 flex items-center justify-center text-[#FF003C] mx-auto">
+            <AlertCircle className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-sm font-bold text-[#FF003C] uppercase tracking-wider">
+              [ CONNECTION_FAULT: HOST_OFFLINE ]
+            </h2>
+            <p className="text-xs text-[#8A99AD]">
+              {errorMessage || 'Gagal tersambung. Pastikan Host masih aktif di room dan link yang dimasukkan tepat.'}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onBackToHome}
+            className="h-10 px-5 text-xs font-bold text-white bg-[#111827] hover:bg-[#1F2937] border border-[#1F2937] transition flex items-center space-x-2 mx-auto cursor-pointer"
+          >
+            <HomeIcon className="w-4 h-4" />
+            <span>[ RETURN_TO_TERMINAL ]</span>
+          </button>
         </div>
-        <div className="max-w-sm space-y-1.5">
-          <h2 className="text-lg font-bold text-white">Koneksi Terputus</h2>
-          <p className="text-xs text-rose-300">
-            {errorMessage || 'Tidak dapat terhubung ke room. Pastikan pembuat room masih aktif dan tautan yang dimasukkan tepat.'}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onBackToHome}
-          className="h-10 px-5 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-xl transition flex items-center space-x-2"
-        >
-          <HomeIcon className="w-4 h-4" />
-          <span>Kembali ke Beranda</span>
-        </button>
       </main>
     );
   }
@@ -280,7 +304,7 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
   const currentUserId = peerServiceRef.current?.getMyId() || '';
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 relative">
+    <div className="min-h-screen flex flex-col bg-[#0B0E14] text-[#E0E6ED] font-mono relative crt-overlay">
       <Header
         roomId={roomId}
         isHost={isHost}

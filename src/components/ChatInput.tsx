@@ -1,18 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Smile, Timer, Flame } from 'lucide-react';
+import { Send, Smile, Flame, Timer } from 'lucide-react';
 
 interface ChatInputProps {
   onSendMessage: (text: string, vanishDuration: number) => void;
   onTyping: (isTyping: boolean) => void;
 }
 
-const QUICK_EMOJIS = ['👍', '😂', '🔥', '❤️', '👏', '🤫', '🚀', '👀', '🎉', '☕'];
+const QUICK_EMOJIS = ['💀', '🔥', '⚡', '👁️', '🤫', '🕶️', '💣', '💻', '🔒', '☕'];
 
 const VANISH_OPTIONS = [
-  { label: 'Permanen', seconds: 0 },
-  { label: '30 Detik', seconds: 30 },
-  { label: '1 Menit', seconds: 60 },
-  { label: '5 Menit', seconds: 300 },
+  { label: 'OFF', seconds: 0 },
+  { label: '30S', seconds: 30 },
+  { label: '60S', seconds: 60 },
+  { label: '300S', seconds: 300 },
 ];
 
 export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, onTyping }) => {
@@ -71,16 +71,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, onTyping })
   }, []);
 
   return (
-    <div className="border-t border-slate-800 bg-slate-900 p-3 sm:p-4 sticky bottom-0 z-20">
+    <div className="border-t-2 border-[#1F2937] bg-[#05070A] p-3 sm:p-4 sticky bottom-0 z-20 font-mono">
       {/* Quick emoji drawer */}
       {showEmojis && (
-        <div className="mb-2.5 p-2 bg-slate-950 border border-slate-800 rounded-xl flex flex-wrap gap-1.5 shadow-lg">
+        <div className="mb-2.5 p-2 bg-[#0B0E14] border border-[#1F2937] flex flex-wrap gap-1.5 shadow-xl">
           {QUICK_EMOJIS.map((emoji) => (
             <button
               key={emoji}
               type="button"
               onClick={() => insertEmoji(emoji)}
-              className="text-lg p-1.5 rounded-lg hover:bg-slate-800 transition"
+              className="text-base p-1 hover:bg-[#1F2937] transition"
             >
               {emoji}
             </button>
@@ -90,10 +90,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, onTyping })
 
       {/* Vanish duration drawer */}
       {showVanishMenu && (
-        <div className="mb-2.5 p-2.5 bg-slate-950 border border-slate-800 rounded-xl flex flex-wrap items-center gap-2 shadow-lg">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 mr-1">
-            <Flame className="w-3.5 h-3.5 text-amber-400" />
-            <span>Masa Aktif Pesan:</span>
+        <div className="mb-2.5 p-2.5 bg-[#0B0E14] border border-[#FF003C]/50 flex flex-wrap items-center gap-2 shadow-xl">
+          <div className="flex items-center gap-1 text-xs font-bold text-[#FF003C] mr-2">
+            <Flame className="w-3.5 h-3.5" />
+            <span>[ PROTOCOL_AUTO_PURGE: ]</span>
           </div>
           {VANISH_OPTIONS.map((opt) => (
             <button
@@ -103,42 +103,43 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, onTyping })
                 setVanishDuration(opt.seconds);
                 setShowVanishMenu(false);
               }}
-              className={`px-3 py-1 text-xs font-semibold rounded-lg border transition ${
+              className={`px-3 py-1 text-xs font-bold border transition ${
                 vanishDuration === opt.seconds
-                  ? 'bg-amber-500 text-slate-950 border-amber-400'
-                  : 'bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800'
+                  ? 'bg-[#FF003C] text-[#0B0E14] border-[#FF003C]'
+                  : 'bg-[#05070A] text-[#8A99AD] border-[#1F2937] hover:border-[#E0E6ED]'
               }`}
             >
-              {opt.label}
+              [{opt.label}]
             </button>
           ))}
         </div>
       )}
 
       <form onSubmit={handleSend} className="flex items-center space-x-2">
-        {/* Vanish timer toggle */}
+        {/* Burn Timer Button */}
         <button
           type="button"
           onClick={() => {
             setShowVanishMenu(!showVanishMenu);
             setShowEmojis(false);
           }}
-          className={`h-11 px-3 rounded-xl border flex items-center space-x-1.5 transition shrink-0 ${
+          className={`h-11 px-2.5 border font-bold text-xs flex items-center space-x-1 transition shrink-0 ${
             vanishDuration > 0
-              ? 'bg-amber-950/60 border-amber-700 text-amber-300'
-              : 'bg-slate-950 hover:bg-slate-850 border-slate-800 text-slate-400 hover:text-slate-200'
+              ? 'bg-[#FF003C]/20 border-[#FF003C] text-[#FF003C]'
+              : 'bg-[#0B0E14] hover:bg-[#111827] border-[#1F2937] text-[#8A99AD]'
           }`}
-          title="Atur waktu pesan otomatis terhapus"
+          title="Atur Burn Timer (Pesan Otomatis Lenyap)"
         >
           <Timer className="w-4 h-4" />
           {vanishDuration > 0 && (
-            <span className="text-xs font-bold font-mono">
-              {VANISH_OPTIONS.find((v) => v.seconds === vanishDuration)?.label}
-            </span>
+            <span>[{VANISH_OPTIONS.find((v) => v.seconds === vanishDuration)?.label}]</span>
           )}
         </button>
 
-        <div className="relative flex-1">
+        <div className="relative flex-1 flex items-center bg-[#0B0E14] border border-[#1F2937] focus-within:border-[#00FF66] transition">
+          <span className="text-xs text-[#00FF66] font-bold pl-3 select-none">
+            anon@node:~#
+          </span>
           <input
             ref={inputRef}
             type="text"
@@ -147,10 +148,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, onTyping })
             onKeyDown={handleKeyDown}
             placeholder={
               vanishDuration > 0
-                ? `Pesan akan otomatis terhapus dalam ${VANISH_OPTIONS.find((v) => v.seconds === vanishDuration)?.label}`
-                : 'Ketik pesan Anda di sini...'
+                ? `[BURN_AFTER_${VANISH_OPTIONS.find((v) => v.seconds === vanishDuration)?.label}] Masukkan payload rahasia...`
+                : 'Ketik payload pesan terenkripsi AES-256...'
             }
-            className="w-full h-11 bg-slate-950 border border-slate-800 focus:border-indigo-500 text-slate-100 placeholder-slate-500 text-sm rounded-xl pl-4 pr-10 transition outline-none"
+            className="w-full h-11 bg-transparent text-[#E0E6ED] placeholder-[#4B5563] text-xs px-2.5 transition outline-none font-mono"
             autoFocus
           />
           <button
@@ -159,20 +160,20 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, onTyping })
               setShowEmojis(!showEmojis);
               setShowVanishMenu(false);
             }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition"
-            title="Pilih reaksi cepat"
+            className="px-3 text-[#8A99AD] hover:text-[#00FF66] transition"
+            title="Emoji Payload"
           >
-            <Smile className="w-5 h-5" />
+            <Smile className="w-4 h-4" />
           </button>
         </div>
 
         <button
           type="submit"
           disabled={!text.trim()}
-          className="h-11 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:hover:bg-indigo-600 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 transition shrink-0"
+          className="h-11 px-4 bg-[#00FF66] hover:bg-[#00dd55] disabled:opacity-40 text-[#0B0E14] font-bold text-xs tracking-wider uppercase transition flex items-center justify-center space-x-1.5 shrink-0 cursor-pointer"
         >
           <Send className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Kirim</span>
+          <span className="hidden sm:inline">[ TRANSMIT ]</span>
         </button>
       </form>
     </div>

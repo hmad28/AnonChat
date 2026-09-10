@@ -1,25 +1,73 @@
 @import "tailwindcss";
 
 @layer base {
-  /* High contrast, legible scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #020617;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #334155;
-    border-radius: 4px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #475569;
+  /* Enforce sharp industrial corners everywhere */
+  * {
+    border-radius: 0px !important;
   }
 
-  /* R-32 Keyboard Accessibility: universal clear focus rings */
-  :focus-visible {
-    outline: 2px solid #6366f1;
-    outline-offset: 2px;
+  body {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Share Tech Mono', monospace;
+    background-color: #0B0E14;
+    color: #E0E6ED;
   }
+
+  /* Industrial Hacker Scrollbar */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #05070A;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1F2937;
+    border: 1px solid #374151;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #00FF66;
+  }
+
+  /* Universal high-contrast terminal focus outline */
+  :focus-visible {
+    outline: 2px solid #00FF66 !important;
+    outline-offset: 1px !important;
+  }
+}
+
+/* Subtle CRT Scanline overlay effect */
+.crt-overlay {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.03),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 0, 255, 0.03)
+  );
+  background-size: 100% 3px, 6px 100%;
+  pointer-events: none;
+}
+
+/* Subtle terminal phosphor glow animation */
+@keyframes terminalPulse {
+  0%, 100% {
+    opacity: 0.95;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.terminal-glow {
+  text-shadow: 0 0 8px rgba(0, 255, 102, 0.4);
+}
+
+.terminal-glow-red {
+  text-shadow: 0 0 8px rgba(255, 0, 60, 0.4);
+}
+
+.terminal-glow-cyan {
+  text-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
 }
