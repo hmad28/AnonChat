@@ -20,6 +20,7 @@ interface RoomProps {
 }
 
 export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHome }) => {
+  const [actualRoomId, setActualRoomId] = useState(roomId);
   const [status, setStatus] = useState<
     'connecting' | 'waiting_approval' | 'active' | 'rejected' | 'dissolved' | 'error'
   >('connecting');
@@ -105,6 +106,12 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
       onApproved: (secret: string) => {
         const url = new URL(window.location.href);
         url.hash = `key=${secret}`;
+        window.history.replaceState({}, '', url.toString());
+      },
+      onRoomIdUpdated: (newId: string) => {
+        setActualRoomId(newId);
+        const url = new URL(window.location.href);
+        url.searchParams.set('room', newId);
         window.history.replaceState({}, '', url.toString());
       },
     });
@@ -282,16 +289,16 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
     return (
       <main className="min-h-screen flex flex-col items-center justify-center p-4 text-center space-y-4 bg-[#0B0E14] text-[#E0E6ED] font-mono crt-overlay">
         <MatrixRain opacity={0.15} />
-        <div className="border-2 border-[#FF003C] bg-[#05070A] p-6 shadow-[0_0_20px_rgba(255,0,60,0.3)] max-w-md space-y-3 relative z-10">
+        <div className="border-2 border-[#FF003C] bg-[#05070A] p-6 shadow-[0_0_20px_rgba(255,0,60,0.3)] max-w-md space-y-4 relative z-10">
           <div className="w-12 h-12 border border-[#FF003C] bg-[#FF003C]/10 flex items-center justify-center text-[#FF003C] mx-auto">
             <AlertCircle className="w-6 h-6" />
           </div>
           <div className="space-y-1">
             <h2 className="text-sm font-bold text-[#FF003C] uppercase tracking-wider">
-              [ CONNECTION_FAULT: HOST_OFFLINE ]
+              {isHost ? '[ ROOM_INITIALIZATION_FAULT ]' : '[ CONNECTION_FAULT: HOST_OFFLINE ]'}
             </h2>
-            <p className="text-xs text-[#8A99AD]">
-              {errorMessage || 'Gagal tersambung. Pastikan Host masih aktif di room dan link yang dimasukkan tepat.'}
+            <p className="text-xs text-[#8A99AD] leading-relaxed">
+              {errorMessage || (isHost ? 'Gagal menginisialisasi broker P2P untuk room ini.' : 'Gagal tersambung ke Host. Pastikan link room tepat dan Host masih aktif.')}
             </p>
           </div>
           <button
@@ -313,7 +320,7 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
   return (
     <div className="min-h-screen flex flex-col bg-[#0B0E14] text-[#E0E6ED] font-mono relative crt-overlay">
       <Header
-        roomId={roomId}
+        roomId={actualRoomId}
         isHost={isHost}
         participantCount={participants.length}
         onLeaveOrDissolve={handleLeaveOrDissolve}
@@ -357,7 +364,7 @@ export const Room: React.FC<RoomProps> = ({ roomId, nickname, isHost, onBackToHo
         isOpen={isSecurityModalOpen}
         onClose={() => setIsSecurityModalOpen(false)}
         safetyData={safetyData}
-        roomId={roomId}
+        roomId={actualRoomId}
       />
     </div>
   );

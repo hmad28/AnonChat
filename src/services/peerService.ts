@@ -2,6 +2,15 @@ import Peer, { DataConnection } from 'peerjs';
 import { ChatMessage, KnockRequest, P2PPayload, Participant, Role } from '../types';
 import { sound } from '../utils/audio';
 import { deriveRoomKey, encryptText, decryptText, EncryptedData } from '../utils/crypto';
+import { toPeerSignalingId } from '../utils/id';
+
+const ICE_SERVERS = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+  { urls: 'stun:stun2.l.google.com:19302' },
+  { urls: 'stun:global.stun.twilio.com:3478' },
+  { urls: 'stun:stun.cloudflare.com:3478' },
+];
 
 export interface PeerServiceCallbacks {
   onStatusChange?: (
@@ -16,6 +25,7 @@ export interface PeerServiceCallbacks {
   onTypingUpdated?: (senderId: string, nickname: string, isTyping: boolean) => void;
   onKeyReady?: (key: CryptoKey) => void;
   onApproved?: (roomSecret: string) => void;
+  onRoomIdUpdated?: (newRoomId: string) => void;
 }
 
 export class PeerService {
@@ -68,7 +78,13 @@ export class PeerService {
   // -------------------------------------------------------------
   // HOST INITIALIZATION
   // -------------------------------------------------------------
-  async initHost(roomId: string, nickname: string, color: string, roomSecret: string): Promise<string> {
+  async initHost(
+    roomId: string,
+    nickname: string,
+    color: string,
+    roomSecret: string,
+    retryCount: number = 0
+  ): Promise<string> {
     this.role = 'host';
     this.myNickname = nickname;
     this.myColor = color;
@@ -79,13 +95,12 @@ export class PeerService {
     this.cryptoKey = await deriveRoomKey(roomSecret, roomId);
     this.callbacks.onKeyReady?.(this.cryptoKey);
 
+    const signalingId = toPeerSignalingId(roomId);
+
     return new Promise((resolve, reject) => {
-      this.peer = new Peer(roomId, {
+      this.peer = new Peer(signalingId, {
         config: {
-          iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:global.stun.twilio.com:3478' },
-          ],
+          iceServers: ICE_SERVERS,
         },
         debug: 1,
       });
@@ -112,7 +127,20 @@ export class PeerService {
       this.peer.on('error', (err) => {
         console.error('Peer host error:', err);
         if (err.type === 'unavailable-id') {
-          this.callbacks.onStatusChange?.('error', 'ID Room ini sudah sedang digunakan oleh sesi lain. Buat ID baru.');
+          if (retryCount < 3) {
+            console.warn(`Signaling ID "${signalingId}" is already taken on broker, auto-recovering with fresh suffix...`);
+            const suffix = Math.random().toString(36).substring(2, 6);
+            const newRoomId = `${roomId}-${suffix}`;
+            this.callbacks.onRoomIdUpdated?.(newRoomId);
+            try {
+              this.peer?.destroy();
+            } catch {}
+            this.initHost(newRoomId, nickname, color, roomSecret, retryCount + 1)
+              .then(resolve)
+              .catch(reject);
+            return;
+          }
+          this.callbacks.onStatusChange?.('error', 'ID Room ini sedang digunakan oleh sesi lain. Silakan buat room baru.');
         } else {
           this.callbacks.onStatusChange?.('error', err.message || 'Terjadi kesalahan koneksi P2P');
         }
@@ -256,10 +284,7 @@ export class PeerService {
     return new Promise((resolve, reject) => {
       this.peer = new Peer({
         config: {
-          iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:global.stun.twilio.com:3478' },
-          ],
+          iceServers: ICE_SERVERS,
         },
         debug: 1,
       });
@@ -268,7 +293,8 @@ export class PeerService {
         this.myId = id;
         this.callbacks.onStatusChange?.('waiting_approval');
 
-        const conn = this.peer!.connect(hostRoomId, {
+        const hostSignalingId = toPeerSignalingId(hostRoomId);
+        const conn = this.peer!.connect(hostSignalingId, {
           reliable: true,
         });
 
